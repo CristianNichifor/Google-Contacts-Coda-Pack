@@ -175,7 +175,7 @@ function extractContactData(person: any) {
   const phones = (person.phoneNumbers||[]).map((p: any) => p.value).filter(Boolean);
   const organizations = (person.organizations || []).map((o: any) => o.name).filter(Boolean);
   
-  // Google's address format is a quite messy
+  // Google's address format is a bit messy
   const addresses = (person.addresses || []).map((a: any) => {
     if (a.formattedValue) return a.formattedValue;
     return [a.streetAddress, a.city, a.region, a.postalCode, a.country]
@@ -186,7 +186,7 @@ function extractContactData(person: any) {
     .map((m: any) => m.contactGroupMembership?.contactGroupResourceName)
     .filter(Boolean);
   
-  // Parse birthdays - Google stores them in such a weird way
+  // Parse birthdays - Google stores them in a very weird way
   const birthdays = (person.birthdays || []).map((b: any) => {
     const date = b.date;
     if (date) {
@@ -198,7 +198,7 @@ function extractContactData(person: any) {
   
   const photoUrl = person.photos?.find((p: any) => p.metadata?.primary)?.url;
   
-  // Figure out what type of contact this is:
+  // Figure out what type of contact this is (Contact, Other Contact...)
   const sources = person.metadata?.sources || [];
   const sourceTypes = sources.map((s: any) => s.type).filter(Boolean);
   const hasContact = sourceTypes.includes("CONTACT");
@@ -234,7 +234,7 @@ async function updateContact(context: any, update: any): Promise<any> {
     const { previousValue, newValue } = update;
     const { resourceName, etag } = previousValue;
     
-    // Can't edit other contacts directly due to People API limits
+    // Can't edit other contacts directly due to People API limitations
     if (previousValue.contactType === "OTHER_CONTACT") {
       throw new coda.UserVisibleError("Can't edit Other contacts. Copy them first using CopyOtherContactToContacts.");
     }
@@ -365,7 +365,7 @@ pack.addSyncTable({
         return { result: results };
       } catch (error) {
         if (error.statusCode === 401) {
-          throw error; // Let Coda handle token refresh as otherwise if we ingest them in code... tokens won't be refreshed by Coda
+          throw error; // Let Coda handle token refresh.
         }
         
         if (error.statusCode === 403) {
@@ -448,7 +448,7 @@ pack.addSyncTable({
           } while (nextPageToken && results.length < limit);
         }
         
-        // Get "other contacts" (the Gmail auto-created ones) that google handles
+        // Get "other contacts" (the Gmail auto-created ones)
         if ((!contactTypeFilter || contactTypeFilter === "OTHER_CONTACT") && results.length < limit) {
           let url = "https://people.googleapis.com/v1/otherContacts";
           const params = [
@@ -713,7 +713,7 @@ pack.addFormula({
         url: `https://people.googleapis.com/v1/${otherContactResourceName}:copyOtherContactToMyContactsGroup`,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          copyMask: "names,emailAddresses,phoneNumbers" // Photos not allowed
+          copyMask: "names,emailAddresses,phoneNumbers" // Photos not allowed to be copied from Other Contacts to Contacts!
         })
       });
       
@@ -727,7 +727,7 @@ pack.addFormula({
   }
 });
 
-// This piece just explains why you can't delete other contacts (again... Google doing Google things)
+// This piece just explains why you can't delete other contacts
 pack.addFormula({
   name: "ExplainOtherContactDeletion",
   description: "Why you can't delete other contacts",
