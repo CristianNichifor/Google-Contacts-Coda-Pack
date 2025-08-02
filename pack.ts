@@ -186,7 +186,7 @@ function extractContactData(person: any) {
     .map((m: any) => m.contactGroupMembership?.contactGroupResourceName)
     .filter(Boolean);
   
-  // Parse birthdays - Google stores them in a very weird way
+  // Parse birthdays - Google stores them weird
   const birthdays = (person.birthdays || []).map((b: any) => {
     const date = b.date;
     if (date) {
@@ -198,7 +198,7 @@ function extractContactData(person: any) {
   
   const photoUrl = person.photos?.find((p: any) => p.metadata?.primary)?.url;
   
-  // Figure out what type of contact this is (Contact, Other Contact...)
+  // Figure out what type of contact this is
   const sources = person.metadata?.sources || [];
   const sourceTypes = sources.map((s: any) => s.type).filter(Boolean);
   const hasContact = sourceTypes.includes("CONTACT");
@@ -234,7 +234,7 @@ async function updateContact(context: any, update: any): Promise<any> {
     const { previousValue, newValue } = update;
     const { resourceName, etag } = previousValue;
     
-    // Can't edit other contacts directly due to People API limitations
+    // Can't edit other contacts directly
     if (previousValue.contactType === "OTHER_CONTACT") {
       throw new coda.UserVisibleError("Can't edit Other contacts. Copy them first using CopyOtherContactToContacts.");
     }
@@ -365,7 +365,7 @@ pack.addSyncTable({
         return { result: results };
       } catch (error) {
         if (error.statusCode === 401) {
-          throw error; // Let Coda handle token refresh.
+          throw error; // Let Coda handle token refresh
         }
         
         if (error.statusCode === 403) {
@@ -515,6 +515,127 @@ pack.addSyncTable({
   }
 });
 
+// Add contact to a specific group
+pack.addFormula({
+  name: "AddContactToGroup",
+  description: "Add a contact to a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceName",
+      description: "Contact resource name"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Group resource name (e.g., contactGroups/myContacts)"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([contactResourceName, groupResourceName], context) {
+    try {
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToAdd: [contactResourceName]
+        })
+      });
+      
+      return `Contact added to group successfully`;
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(`Contact or group not found`);
+      }
+      throw new coda.UserVisibleError(`Failed to add contact to group: ${error.message}`);
+    }
+  }
+});
+
+// Remove contact from a specific group
+pack.addFormula({
+  name: "RemoveContactFromGroup",
+  description: "Remove a contact from a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceName",
+      description: "Contact resource name"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Group resource name (e.g., contactGroups/myContacts)"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([contactResourceName, groupResourceName], context) {
+    try {
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToRemove: [contactResourceName]
+        })
+      });
+      
+      return `Contact removed from group successfully`;
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(`Contact or group not found`);
+      }
+      throw new coda.UserVisibleError(`Failed to remove contact from group: ${error.message}`);
+    }
+  }
+});
+
+// Create a new contact group
+pack.addFormula({
+  name: "CreateContactGroup",
+  description: "Create a new contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupName",
+      description: "Name for the new contact group"
+    })
+  ],
+  resultType: coda.ValueType.Object,
+  schema: ContactGroupSchema,
+  isAction: true,
+  execute: async function ([groupName], context) {
+    try {
+      const response = await context.fetcher.fetch({
+        method: "POST",
+        url: "https://people.googleapis.com/v1/contactGroups",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactGroup: {
+            name: groupName
+          }
+        })
+      });
+      
+      const group = response.body;
+      return {
+        resourceName: group.resourceName,
+        etag: group.etag,
+        name: group.name,
+        formattedName: group.formattedName,
+        groupType: group.groupType,
+        memberCount: 0,
+        memberResourceNames: []
+      };
+    } catch (error) {
+      throw new coda.UserVisibleError(`Failed to create group: ${error.message}`);
+    }
+  }
+});
+
 pack.addFormula({
   name: "CreateContact",
   description: "Create a new contact",
@@ -547,12 +668,18 @@ pack.addFormula({
       name: "organization",
       description: "Company",
       optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactGroup",
+      description: "Contact group resource name (e.g., contactGroups/myContacts)",
+      optional: true
     })
   ],
   resultType: coda.ValueType.Object,
   schema: ContactSchema,
   isAction: true,
-  execute: async function ([givenName, familyName, emailAddress, phoneNumber, organization], context) {
+  execute: async function ([givenName, familyName, emailAddress, phoneNumber, organization, contactGroup], context) {
     const contactData: any = {
       names: [{ givenName, familyName: familyName || "" }]
     };
@@ -562,14 +689,38 @@ pack.addFormula({
     if (organization) contactData.organizations = [{ name: organization }];
     
     try {
-      const response = await context.fetcher.fetch({
+      // Step 1: Create the contact
+      const createResponse = await context.fetcher.fetch({
         method: "POST",
         url: "https://people.googleapis.com/v1/people:createContact",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contactData)
       });
       
-      return extractContactData(response.body);
+      const createdContact = extractContactData(createResponse.body);
+      
+      // Step 2: Add to group if specified
+      if (contactGroup && createdContact.resourceName) {
+        try {
+          await context.fetcher.fetch({
+            method: "POST",
+            url: `https://people.googleapis.com/v1/${contactGroup}/members:modify`,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              resourceNamesToAdd: [createdContact.resourceName]
+            })
+          });
+          
+          // Update the contact data to reflect group membership
+          createdContact.memberships = [...(createdContact.memberships || []), contactGroup];
+        } catch (groupError) {
+          // Contact was created but group assignment failed
+          console.log(`Failed to add contact to group: ${groupError.message}`);
+          // Still return the created contact, just without group membership
+        }
+      }
+      
+      return createdContact;
     } catch (error) {
       throw new coda.UserVisibleError(`Create failed: ${error.message}`);
     }
@@ -713,7 +864,7 @@ pack.addFormula({
         url: `https://people.googleapis.com/v1/${otherContactResourceName}:copyOtherContactToMyContactsGroup`,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          copyMask: "names,emailAddresses,phoneNumbers" // Photos not allowed to be copied from Other Contacts to Contacts!
+          copyMask: "names,emailAddresses,phoneNumbers" // Photos not allowed
         })
       });
       
@@ -727,7 +878,7 @@ pack.addFormula({
   }
 });
 
-// This piece just explains why you can't delete other contacts
+// This just explains why you can't delete other contacts
 pack.addFormula({
   name: "ExplainOtherContactDeletion",
   description: "Why you can't delete other contacts",
