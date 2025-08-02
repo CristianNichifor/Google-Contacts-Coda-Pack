@@ -1,0 +1,30 @@
+{
+  "name": "google-contacts-coda-pack",
+  "version": "1.0.0",
+  "description": "Two-way sync between Google Contacts and Coda tables",
+  "main": "pack.ts",
+  "scripts": {
+    "validate": "coda validate pack.ts",
+    "upload": "coda upload pack.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/google-contacts-coda-pack.git"
+  },
+  "keywords": [
+    "coda",
+    "pack",
+    "google",
+    "contacts",
+    "sync",
+    "crm"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@codahq/packs-sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
