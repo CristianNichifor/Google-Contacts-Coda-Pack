@@ -1,6 +1,6 @@
 # Google Contacts Coda Pack
 
-Two-way sync between Google Contacts and Coda tables with comprehensive group management. Edit contacts directly in Coda and sync changes back to Google automatically.
+Comprehensive Google Contacts Coda Pack with two-way sync support. Manage regular contacts and Gmail "other contacts" directly in Coda tables. Features: CRUD operations, contact groups, batch updates, and seamless OAuth token refresh. Edit contacts in Coda and sync changes back to Google automatically. Two-way sync between Google Contacts and Coda tables. Edit contacts directly in Coda and sync changes back to Google automatically.
 
 ![Coda Pack](https://img.shields.io/badge/Coda-Pack-blue)
 ![Google Contacts](https://img.shields.io/badge/Google-Contacts-green)
@@ -282,15 +282,6 @@ profile
 - **Token storage** - Handled by Coda platform
 - **Sync frequency** - Controlled by Coda sync settings
 - **Result columns** - Limited to pack return types
-
-## 🎯 Roadmap
-
-Future enhancements being considered:
-- **Bulk import/export** capabilities
-- **Advanced search filters**
-- **Contact deduplication** tools
-- **Enhanced group management**
-- **Custom field mapping**
 
 ## 📄 License
 
