@@ -13,7 +13,7 @@ Syncs all contacts with full editing support.
 - `maxResults` (optional): Maximum contacts to return (default: 1000)
 
 **Examples:**
-
+```javascript
 SyncContacts()                           // All contacts
 SyncContacts("CONTACT")                  // Regular contacts only
 SyncContacts("OTHER_CONTACT")            // Other contacts only  
