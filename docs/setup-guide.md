@@ -90,9 +90,10 @@ Complete setup instructions for the Google Contacts Coda Pack.
 2. Edit the name or email
 3. Wait for sync to complete
 4. Check Google Contacts to verify change
+5. You can edit it either by activating the 2-way sync or using the update contact canva or column button.
 
 ### Create Contact
-1. Add new row to sync table
+1. Add new row to sync table using the canvas or column button from this pack.
 2. Fill in contact details
 3. Sync will create contact in Google
 
