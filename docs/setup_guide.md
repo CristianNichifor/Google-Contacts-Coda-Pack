@@ -89,7 +89,7 @@ If you selected "External" user type:
 5. **Authorized redirect URIs**: 
    - Click **"Add URI"**
    - Enter **exactly**: `https://coda.io/packsAuth/oauth2`
-   - ⚠️ **Critical**: This URL must be exact - no typos!
+   - ⚠️ **Critical**: This URL must be exactlythe same with the one Coda provides in the pack settings in pack studio - no typos!
 6. Click **"Create"**
 7. **Save the credentials**:
    - Copy **Client ID** 
@@ -305,9 +305,7 @@ If you encounter issues during setup:
 ## 🎉 Next Steps
 
 Once setup is complete:
-
-1. **Explore advanced features** - contact groups, duplicate detection, vCard export
-2. **Set up automation** - use Coda's automation features with contact data
+2. **Set up automation** - use Coda's automation features with contact data etc
 3. **Customize views** - create filtered views for different use cases
 4. **Integrate with other packs** - combine with CRM or email packs
 5. **Share with team** - give colleagues access to shared contact database
