@@ -292,7 +292,7 @@ For complete API documentation, see our [API Reference Guide](docs/api-reference
 #### Performance Issues
 - **Large contact lists:** Use filtering and pagination (`maxResults` parameter)
 - **Rate limiting:** Monitor API quotas in Google Cloud Console
-- **Slow sync:** Consider syncing during off-peak hours
+- **Slow sync:** If you have a lot of contacts
 
 ### Error Codes
 - **400:** Bad request (invalid data format)
