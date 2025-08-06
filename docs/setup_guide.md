@@ -118,8 +118,6 @@ If you selected "External" user type:
 2. Configure OAuth settings:
    - **Client ID**: Paste from Google Cloud Console
    - **Client Secret**: Paste from Google Cloud Console
-   - **Authorization URL**: `https://accounts.google.com/o/oauth2/v2/auth`
-   - **Token URL**: `https://oauth2.googleapis.com/token`
 3. **Save configuration**
 
 ### 2.3 Validate and Test Pack
