@@ -16,7 +16,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# Google credentials
+# Google credentials (NEVER commit these)
 google-credentials.json
 service-account-key.json
 client-secret.json
