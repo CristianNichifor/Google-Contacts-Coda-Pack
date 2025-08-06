@@ -16,7 +16,7 @@ Complete setup instructions for the Google Contacts Coda Pack.
 
 ### OAuth Consent Screen
 1. Go to "APIs & Services" → "OAuth consent screen"
-2. Choose "External" user type
+2. Choose "External" user type¨(this applies if you are using a gmail.com account) or "Internal" if using a Google Workspace!
 3. Fill required information:
    - App name: Choose any name
    - User support email: Your email
