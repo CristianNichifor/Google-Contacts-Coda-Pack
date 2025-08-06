@@ -19,7 +19,6 @@ A comprehensive Google Contacts integration for Coda with full two-way sync capa
 - 📊 **Rich Data Support** - Birthdays, addresses, organizations, custom fields, and more
 - 🌍 **International Support** - Country codes, address formatting, and localization
 - 📱 **Contact Deduplication** - Smart duplicate detection and merging
-- 🎨 **vCard Export** - Export contacts to standard vCard format
 
 ## 📋 Table of Contents
 
