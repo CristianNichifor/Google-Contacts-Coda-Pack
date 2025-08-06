@@ -1,6 +1,6 @@
 {
   "name": "google-contacts-coda-pack",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive Google Contacts integration for Coda with two-way sync",
   "main": "pack.ts",
   "scripts": {
@@ -17,7 +17,7 @@
     "sync",
     "crm"
   ],
-  "author": "Your Name",
+  "author": "Cristian Nichifor",
   "license": "MIT",
   "devDependencies": {
     "@codahq/packs-cli": "latest",
