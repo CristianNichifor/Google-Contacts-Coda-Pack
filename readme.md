@@ -344,7 +344,7 @@ For detailed troubleshooting, see our [Troubleshooting Guide](docs/troubleshooti
 
 ## 🤝 Contributing
 
-We welcome contributions to improve the Google Contacts Coda Pack!
+I welcome contributions to improve the Google Contacts Coda Pack!
 
 ### Development Setup
 1. **Clone** this repository
