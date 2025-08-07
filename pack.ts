@@ -2182,12 +2182,12 @@ pack.addSyncTable({
 
 // Main Contacts Sync Table with Two-Way Sync
 pack.addSyncTable({
-  name: "EnhancedContacts",
+  name: "Contacts",
   description: "Google Contacts with comprehensive two-way sync (10 emails, 10 phones, 5 addresses, extended name fields, compiled lists, etc.)",
   identityName: "Contact",
   schema: ContactSchemaComplete,
   formula: {
-    name: "SyncEnhancedContacts",
+    name: "SyncContacts",
     description: "Sync contacts with extended fields including compiled email and phone lists",
     parameters: [
       coda.makeParameter({
