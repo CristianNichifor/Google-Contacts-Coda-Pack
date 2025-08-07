@@ -2313,6 +2313,11 @@ pack.addSyncTable({
 
         return { result: results };
       } catch (error) {
+        // Let 401 errors bubble up for automatic token refresh
+        if (error.statusCode === 401) {
+          throw error;
+        }
+        // Handle other errors with user-friendly messages
         throw new coda.UserVisibleError(`Failed to sync contacts: ${error.message}`);
       }
     },
