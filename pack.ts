@@ -17,6 +17,7 @@ pack.setUserAuthentication({
   additionalParams: {
     access_type: "offline",
     include_granted_scopes: "true",
+    prompt: "consent"
   },
   getConnectionName: async function (context) {
     try {
