@@ -2070,7 +2070,7 @@ async function updateContact(context: any, update: any): Promise<any> {
 
 
 //---------------------------------------------------------------------------------------------------------------------------//
-// Sync Tables bellow - Both Contact Groups and Enhanced Contacts
+// Sync Tables bellow - Both Contact Groups and Contacts
 //---------------------------------------------------------------------------------------------------------------------------//
 
 // Contact Groups Schema
