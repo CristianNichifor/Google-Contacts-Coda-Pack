@@ -365,7 +365,7 @@ const FIELD_LABEL_CONFIG = {
   },
   phone: {
     options: [
-      "home", "work", "other", "mobile", "main", 
+      "home", "work", "other", "mobile", "main",
       "home fax", "work (fax)", "google voice", "pager",
       "cell", "office", "landline", "business"
     ],
@@ -427,10 +427,10 @@ const REVERSE_LABEL_MAPPINGS = {
 // Helper function to get label type mapping for Google API
 function mapLabelToGoogleType(label: string, fieldType: 'email' | 'phone' | 'address'): string {
   if (!label) return 'other';
-  
+
   const config = FIELD_LABEL_CONFIG[fieldType];
   if (!config) return 'other';
-  
+
   const labelLower = label.toLowerCase();
   return config.mapping[labelLower] || 'other';
 }
@@ -438,10 +438,10 @@ function mapLabelToGoogleType(label: string, fieldType: 'email' | 'phone' | 'add
 // Helper function to map Google API type back to our label format
 function mapGoogleTypeToLabel(googleType: string, fieldType: 'email' | 'phone' | 'address'): string {
   if (!googleType) return 'other';
-  
+
   const reverseMapping = REVERSE_LABEL_MAPPINGS[fieldType];
   if (!reverseMapping) return 'other';
-  
+
   const typeLower = googleType.toLowerCase();
   return reverseMapping[typeLower] || 'other';
 }
@@ -454,10 +454,10 @@ function getFieldLabelOptions(fieldType: 'email' | 'phone' | 'address'): string[
 // Utility function to validate if a label is valid for a field type
 function isValidLabel(label: string, fieldType: 'email' | 'phone' | 'address'): boolean {
   if (!label) return false;
-  
+
   const config = FIELD_LABEL_CONFIG[fieldType];
   if (!config) return false;
-  
+
   const labelLower = label.toLowerCase();
   return labelLower in config.mapping;
 }
@@ -548,16 +548,15 @@ function parseDate(dateStr: string): { year?: number; month?: number; day?: numb
 // Helper function to create date object for Google API
 function createGoogleDate(dateInput: string | Date): { year?: number; month?: number; day?: number } | null {
   let parsed;
-  
+
   if (dateInput instanceof Date) {
     // Handle Date object
     parsed = {
       year: dateInput.getFullYear(),
-      month: dateInput.getMonth() + 1, // getMonth() returns 0-11, Google API expects 1-12
+      month: dateInput.getMonth() + 1,
       day: dateInput.getDate()
     };
   } else if (typeof dateInput === 'string') {
-    // Handle string input (for backward compatibility)
     parsed = parseDate(dateInput);
     if (!parsed) return null;
   } else {
@@ -606,9 +605,9 @@ function validateContactData(contactData: any, isUpdate: boolean = false): { isV
   // Validate emails
   if (contactData.emailAddresses) {
     contactData.emailAddresses.forEach((email: any, index: number) => {
-    if (email.value && !isValidEmail(email.value)) {
-      errors.push(`Invalid email format at position ${index + 1}: ${email.value}`);
-    }
+      if (email.value && !isValidEmail(email.value)) {
+        errors.push(`Invalid email format at position ${index + 1}: ${email.value}`);
+      }
     });
   }
 
@@ -630,29 +629,29 @@ function validateContactData(contactData: any, isUpdate: boolean = false): { isV
 // Helper function to compile all email addresses from numbered fields
 function compileAllEmails(contact: any): string[] {
   const emails: string[] = [];
-  
+
   // Get primary email (special case)
   const primaryEmail = contact.primaryEmail;
   if (primaryEmail && primaryEmail.trim() && isValidEmail(primaryEmail)) {
-  emails.push(primaryEmail.trim()); // ← This is correct for extract function
-}
+    emails.push(primaryEmail.trim()); // ← This is correct for extract function
+  }
 
-// Get emails 2-10
+  // Get emails 2-10
   for (let i = 2; i <= 10; i++) {
     const email = contact[`email${i}`];
     if (email && email.trim() && isValidEmail(email)) {
       emails.push(email.trim());
     }
   }
-  
-// Remove duplicates using filter
+
+  // Remove duplicates using filter
   return emails.filter((email, index) => emails.indexOf(email) === index);
 }
 
 // Helper function to compile all phone numbers from numbered fields
 function compileAllPhones(contact: any): string[] {
   const phones: string[] = [];
-  
+
   // Get primary phone (special case)
   const primaryPhone = contact.primaryPhone;
   if (primaryPhone && primaryPhone.trim()) {
@@ -666,7 +665,7 @@ function compileAllPhones(contact: any): string[] {
       phones.push(phone.trim());
     }
   }
-  
+
   // Remove duplicates using filter
   return phones.filter((phone, index) => phones.indexOf(phone) === index);
 }
@@ -684,7 +683,7 @@ function extractOrganizationData(organizations: any[]): { name: string; title: s
   }
 
   const primaryOrg = organizations.find((org: any) => org.metadata?.primary) || organizations[0];
-  
+
   return {
     name: primaryOrg.name || '',
     title: primaryOrg.title || '',
@@ -715,7 +714,7 @@ function validateOrganizationData(name: string, title: string, department: strin
 // Helper function to format related people string from relations array
 function formatRelatedPeopleFromRelations(relations: any[]): string {
   if (!relations || relations.length === 0) return '';
-  
+
   return relations
     .map(rel => `${rel.person || ''}: ${rel.type || ''}`)
     .filter(rel => rel !== ': ')
@@ -760,7 +759,7 @@ function extractCustomFieldByIndex(userDefined: any[], index: number): { value: 
 // Helper function to create custom fields array from individual fields
 function createCustomFieldsArray(customFields: { [key: string]: string }): any[] {
   const userDefined = [];
-  
+
   for (let i = 1; i <= 10; i++) {
     const fieldValue = customFields[`customField${i}`];
     const labelValue = customFields[`customField${i}Label`];
@@ -772,9 +771,10 @@ function createCustomFieldsArray(customFields: { [key: string]: string }): any[]
       });
     }
   }
-  
+
   return userDefined;
 }
+
 
 //---------------------------------------------------------------------------------------------------------------------------//
 // CONTACT SCHEMA DEFINITION
@@ -791,7 +791,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     description: "The ETag of the contact"
   },
 
-  // Name fields (MUTABLE)
+  // Name fields
   displayName: {
     type: coda.ValueType.String,
     description: "The display name of the contact",
@@ -848,7 +848,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // 10 Email fields (ALL MUTABLE)
+  // 10 Email fields
   primaryEmail: {
     type: coda.ValueType.String,
     description: "Primary email",
@@ -987,7 +987,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     description: "All email addresses (compiled from email1-10)"
   },
 
-  // 10 Phone fields (ALL MUTABLE)
+  // 10 Phone fields
   primaryPhone: {
     type: coda.ValueType.String,
     description: "Primary phone",
@@ -1116,7 +1116,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     description: "All phone numbers (compiled from phone1-10)"
   },
 
-  // Organization info (ALL MUTABLE) - FIXED: Now using proper Google API terminology
+  // Organization info
   organization: {
     type: coda.ValueType.String,
     description: "Organization name",
@@ -1133,7 +1133,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Primary Address fields (ALL MUTABLE)
+  // Primary Address fields
   primaryAddressStreet: {
     type: coda.ValueType.String,
     description: "Primary address street",
@@ -1174,7 +1174,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Address 2 fields (ALL MUTABLE)
+  // Address 2 fields 
   address2Street: {
     type: coda.ValueType.String,
     description: "Address 2 street",
@@ -1215,7 +1215,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Address 3 fields (ALL MUTABLE)
+  // Address 3 fields
   address3Street: {
     type: coda.ValueType.String,
     description: "Address 3 street",
@@ -1256,7 +1256,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Address 4 fields (ALL MUTABLE)
+  // Address 4 fields
   address4Street: {
     type: coda.ValueType.String,
     description: "Address 4 street",
@@ -1297,7 +1297,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Address 5 fields (ALL MUTABLE)
+  // Address 5 fields
   address5Street: {
     type: coda.ValueType.String,
     description: "Address 5 street",
@@ -1338,7 +1338,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Additional info (ALL MUTABLE)
+  // Additional info
   notes: {
     type: coda.ValueType.String,
     description: "Notes about the contact",
@@ -1357,7 +1357,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // 10 Significant dates with labels (ALL MUTABLE)
+  // 10 Significant dates with labels
   significantDate1: {
     type: coda.ValueType.String,
     description: "Significant date 1",
@@ -1469,14 +1469,14 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
     mutable: true
   },
 
-  // Related contacts field (ALL MUTABLE)
+  // Related contacts fields
   relatedPeople: {
     type: coda.ValueType.String,
     description: "Related people (comma-separated: 'Name: Relationship, Name2: Relationship2')",
     mutable: true
   },
 
-  // 10 custom fields with labels (ALL MUTABLE)
+  // 10 custom fields with labels
   customField1: {
     type: coda.ValueType.String,
     description: "Custom field 1 value",
@@ -1600,7 +1600,7 @@ const ContactSchemaProperties: coda.ObjectSchemaProperties<string> = {
   }
 };
 
-// Creating the complete contact schema
+// Contact schema
 const ContactSchema = coda.makeObjectSchema({
   properties: ContactSchemaProperties,
   displayProperty: "displayName",
@@ -1639,7 +1639,7 @@ const ContactGroupSchema = coda.makeObjectSchema({
     },
     groupType: {
       type: coda.ValueType.String,
-      description: "The type of the contact group"
+      description: "The type of the contact group (SYSTEM_CONTACT_GROUP or USER_CONTACT_GROUP)"
     },
     memberCount: {
       type: coda.ValueType.Number,
@@ -1649,12 +1649,156 @@ const ContactGroupSchema = coda.makeObjectSchema({
       type: coda.ValueType.Array,
       items: { type: coda.ValueType.String },
       description: "Resource names of contacts in this group"
+    },
+    
+    isDeprecated: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this group is deprecated by Google and cannot be modified"
+    },
+    isCustomGroup: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this is a user-created custom group (can always be modified)"
+    },
+    canModify: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this group can be modified (add/remove contacts, rename, delete)"
+    },
+    canDelete: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this group can be deleted (only custom groups)"
+    },
+    canRename: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this group can be renamed (only custom groups)"
+    },
+    
+    // Text status fields for readable information
+    status: {
+      type: coda.ValueType.String,
+      description: "Human-readable status of the group"
+    },
+    statusIcon: {
+      type: coda.ValueType.String,
+      description: "Text indicator for group status (ACTIVE, BLOCKED, SYSTEM, READONLY)"
+    },
+    
+    // Additional helpful fields
+    createdByUser: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this group was created by the user (vs Google system)"
+    },
+    isSystemGroup: {
+      type: coda.ValueType.Boolean,
+      description: "Whether this is a Google system group"
+    },
+    
+    // Operational recommendations
+    recommendedAction: {
+      type: coda.ValueType.String,
+      description: "Recommended action for this group type"
     }
   },
   displayProperty: "formattedName",
   idProperty: "resourceName",
-  featuredProperties: ["formattedName", "memberCount", "groupType"]
+  featuredProperties: [
+    "formattedName", 
+    "canModify",
+    "canDelete", 
+    "isDeprecated",
+    "isCustomGroup",
+    "status",
+    "memberCount", 
+    "groupType"
+  ]
 });
+
+// Helper function to determine group characteristics and status
+function analyzeContactGroup(groupResourceName: string, groupType?: string): {
+  isDeprecated: boolean;
+  isCustomGroup: boolean;
+  canModify: boolean;
+  status: string;
+  statusIcon: string;
+} {
+  const deprecatedGroups = [
+    'contactGroups/friends',
+    'contactGroups/family',
+    'contactGroups/coworkers'
+  ];
+
+  const modifiableSystemGroups = [
+    'contactGroups/myContacts',
+    'contactGroups/starred'
+  ];
+
+  const isDeprecated = deprecatedGroups.includes(groupResourceName);
+  const isCustomGroup = groupType === 'USER_CONTACT_GROUP';
+  const isModifiableSystem = modifiableSystemGroups.includes(groupResourceName);
+  const canModify = (isCustomGroup || isModifiableSystem) && !isDeprecated;
+
+  let status, statusIcon;
+  if (isDeprecated) {
+    status = 'Deprecated (Cannot Modify)';
+    statusIcon = 'BLOCKED';
+  } else if (isCustomGroup) {
+    status = 'Custom Group (Full Access)';
+    statusIcon = 'ACTIVE';
+  } else if (isModifiableSystem) {
+    status = 'System Group (Can Modify Members)';
+    statusIcon = 'SYSTEM';
+  } else {
+    status = 'System Group (Read Only)';
+    statusIcon = 'READONLY';
+  }
+
+  return { isDeprecated, isCustomGroup, canModify, status, statusIcon };
+}
+
+// Helper function to create group result object with all status fields
+function createGroupResult(group: any): any {
+  const analysis = analyzeContactGroup(group.resourceName, group.groupType);
+  
+  // Determine specific capabilities
+  const canDelete = analysis.isCustomGroup && !analysis.isDeprecated;
+  const canRename = analysis.isCustomGroup && !analysis.isDeprecated;
+  const createdByUser = analysis.isCustomGroup;
+  const isSystemGroup = !analysis.isCustomGroup;
+  
+  // Generate recommendations
+  let recommendedAction;
+  if (analysis.isDeprecated) {
+    const groupName = group.resourceName.split('/')[1];
+    recommendedAction = `Create replacement: CreateContactGroup("${groupName}")`;
+  } else if (analysis.canModify) {
+    recommendedAction = 'Ready for all group operations';
+  } else {
+    recommendedAction = 'Read-only - create custom group for modifications';
+  }
+
+  return {
+    resourceName: group.resourceName,
+    etag: group.etag,
+    name: group.name,
+    formattedName: group.formattedName,
+    groupType: group.groupType,
+    memberCount: group.memberCount || 0,
+    memberResourceNames: group.memberResourceNames || [],
+    
+    // Checkbox status fields
+    isDeprecated: analysis.isDeprecated,
+    isCustomGroup: analysis.isCustomGroup,
+    canModify: analysis.canModify,
+    canDelete: canDelete,
+    canRename: canRename,
+    createdByUser: createdByUser,
+    isSystemGroup: isSystemGroup,
+    
+    // Text status fields
+    status: analysis.status,
+    statusIcon: analysis.statusIcon,
+    recommendedAction: recommendedAction
+  };
+}
 
 //---------------------------------------------------------------------------------------------------------------------------//
 // DATA EXTRACTION FUNCTION
@@ -1742,7 +1886,7 @@ function extractContactData(person: any) {
         [`address${addressNum}Country`]: convertCountryCodeToName(addr.countryCode || ''),
         [`address${addressNum}Street`]: cleanAddressComponent(addr.streetAddress || ''),
         [`address${addressNum}Street2`]: cleanAddressComponent(addr.extendedAddress || ''),
-        [`address${addressNum}Postcode`]: cleanAddressComponent(addr.postalCode || ''),        
+        [`address${addressNum}Postcode`]: cleanAddressComponent(addr.postalCode || ''),
         [`address${addressNum}City`]: cleanAddressComponent(addr.city || ''),
         [`address${addressNum}POBox`]: cleanAddressComponent(addr.poBox || ''),
         [`address${addressNum}Label`]: mapGoogleTypeToLabel(addr.type || '', 'address')
@@ -1840,7 +1984,7 @@ function extractContactData(person: any) {
     phone10: getPhoneByIndex(9),
     phone10Label: getPhoneLabelByIndex(9),
 
-    // Organization info - FIXED: Using proper terminology
+    // Organization info
     organization: organizationData.name,
     jobTitle: organizationData.title,
     department: organizationData.department,
@@ -1856,10 +2000,8 @@ function extractContactData(person: any) {
     notes: biographies[0]?.value || '',
     website: urls[0]?.value || '',
 
-    // Birthday as proper date format
-birthday: birthdays[0] ? formatDate(`${birthdays[0].date?.year || 1900}-${birthdays[0].date?.month || 1}-${birthdays[0].date?.day || 1}`) : '',
+    birthday: birthdays[0] ? formatDate(`${birthdays[0].date?.year || 1900}-${birthdays[0].date?.month || 1}-${birthdays[0].date?.day || 1}`) : '',
 
-    // 10 significant dates (optimized to avoid duplicate function calls)
     ...(() => {
       const fields: any = {};
       for (let i = 1; i <= 10; i++) {
@@ -2020,7 +2162,7 @@ async function updateContact(context: any, update: any): Promise<any> {
       updateMask.push("phoneNumbers");
     }
 
-    // Handle organization updates - FIXED: Using proper Google API field name
+    // Handle organization updates
     if (newValue.organization !== undefined || newValue.jobTitle !== undefined || newValue.department !== undefined) {
       const organization = newValue.organization !== undefined ? newValue.organization : previousValue.organization || "";
       const jobTitle = newValue.jobTitle !== undefined ? newValue.jobTitle : previousValue.jobTitle || "";
@@ -2033,12 +2175,12 @@ async function updateContact(context: any, update: any): Promise<any> {
     // Handle address updates - support all 5 addresses
     const addressFields = [
       // Primary address fields
-      'primaryAddressCountry', 'primaryAddressStreet', 'primaryAddressStreet2','primaryAddressPostcode', 'primaryAddressCity', 'primaryAddressPOBox', 'primaryAddressLabel',
+      'primaryAddressCountry', 'primaryAddressStreet', 'primaryAddressStreet2', 'primaryAddressPostcode', 'primaryAddressCity', 'primaryAddressPOBox', 'primaryAddressLabel',
       // All other address fields
-      'address2Country', 'address2Street', 'address2Street2','address2Postcode', 'address2City', 'address2POBox', 'address2Label',
-      'address3Country', 'address3Street', 'address3Street2','address3Postcode', 'address3City', 'address3POBox', 'address3Label',
-      'address4Country', 'address4Street', 'address4Street2','address4Postcode', 'address4City', 'address4POBox', 'address4Label',
-      'address5Country', 'address5Street', 'address5Street2','address5Postcode', 'address5City', 'address5POBox', 'address5Label'
+      'address2Country', 'address2Street', 'address2Street2', 'address2Postcode', 'address2City', 'address2POBox', 'address2Label',
+      'address3Country', 'address3Street', 'address3Street2', 'address3Postcode', 'address3City', 'address3POBox', 'address3Label',
+      'address4Country', 'address4Street', 'address4Street2', 'address4Postcode', 'address4City', 'address4POBox', 'address4Label',
+      'address5Country', 'address5Street', 'address5Street2', 'address5Postcode', 'address5City', 'address5POBox', 'address5Label'
     ];
 
     const addressesChanged = addressFields.some(field => newValue[field] !== undefined);
@@ -2135,7 +2277,7 @@ async function updateContact(context: any, update: any): Promise<any> {
         const labelValue = newValue[significantDateLabelFields[i]] !== undefined ? newValue[significantDateLabelFields[i]] : previousValue[significantDateLabelFields[i]];
 
         if (dateValue) {
-          const googleDate = createGoogleDate(dateValue); // This should handle both strings and Date objects now
+          const googleDate = createGoogleDate(dateValue);
           if (googleDate) {
             events.push({
               date: googleDate,
@@ -2164,12 +2306,12 @@ async function updateContact(context: any, update: any): Promise<any> {
 
     if (customFieldsChanged) {
       const customFieldsData: { [key: string]: string } = {};
-      
+
       // Collect all custom field data
       for (let i = 0; i < 10; i++) {
         const fieldValue = newValue[customFields[i]] !== undefined ? newValue[customFields[i]] : previousValue[customFields[i]];
         const labelValue = newValue[customFieldLabels[i]] !== undefined ? newValue[customFieldLabels[i]] : previousValue[customFieldLabels[i]];
-        
+
         customFieldsData[`customField${i + 1}`] = fieldValue || '';
         customFieldsData[`customField${i + 1}Label`] = labelValue || '';
       }
@@ -2204,7 +2346,7 @@ async function updateContact(context: any, update: any): Promise<any> {
 
   } catch (error) {
     logContactOperation('UPDATE_CONTACT_ERROR', update.previousValue.resourceName, { error: error.message });
-    
+
     if (error.statusCode === 400) {
       throw new coda.UserVisibleError(`Invalid data for update: ${error.message}`);
     } else if (error.statusCode === 401) {
@@ -2228,12 +2370,12 @@ async function updateContact(context: any, update: any): Promise<any> {
 // Contact Groups Sync Table
 pack.addSyncTable({
   name: "ContactGroups",
-  description: "Contact groups from Google Contacts",
+  description: "Contact groups from Google Contacts with status indicators",
   identityName: "ContactGroup",
   schema: ContactGroupSchema,
   formula: {
     name: "SyncContactGroups",
-    description: "Sync contact groups from Google Contacts",
+    description: "Sync contact groups from Google Contacts with status information",
     parameters: [
       coda.makeParameter({
         type: coda.ParameterType.Number,
@@ -2241,16 +2383,24 @@ pack.addSyncTable({
         description: "Maximum number of groups to sync (default: 1000)",
         optional: true,
       }),
+      coda.makeParameter({
+        type: coda.ParameterType.Boolean,
+        name: "includeDeprecated",
+        description: "Include deprecated groups in results (default: true)",
+        optional: true,
+      }),
     ],
-    execute: async function ([maxResults], context) {
+    execute: async function ([maxResults, includeDeprecated], context) {
       try {
         const limit = Math.min(maxResults || 1000, 1000);
-        logContactOperation('SYNC_GROUPS_START', 'all', { maxResults: limit });
+        const showDeprecated = includeDeprecated !== false; // Default to true
+        
+        logContactOperation('SYNC_GROUPS_START', 'all', { maxResults: limit, includeDeprecated: showDeprecated });
 
         const response = await context.fetcher.fetch({
           method: "GET",
           url: `https://people.googleapis.com/v1/contactGroups?pageSize=${limit}`,
-          cacheTtlSecs: 300,
+          cacheTtlSecs: 60,
         });
 
         const groups = response.body.contactGroups || [];
@@ -2258,15 +2408,28 @@ pack.addSyncTable({
 
         for (const group of groups) {
           try {
-            // Get detailed group information including member count
-            const detailResponse = await context.fetcher.fetch({
-              method: "GET",
-              url: `https://people.googleapis.com/v1/${group.resourceName}?maxMembers=10000`,
-              cacheTtlSecs: 300
-            });
+            // Skip deprecated groups if not requested
+            const analysis = analyzeContactGroup(group.resourceName, group.groupType);
+            if (analysis.isDeprecated && !showDeprecated) {
+              continue;
+            }
 
-            const detailGroup = detailResponse.body;
-            results.push({
+            // Get detailed group information including member count
+            let detailGroup;
+            try {
+              const detailResponse = await context.fetcher.fetch({
+                method: "GET",
+                url: `https://people.googleapis.com/v1/${group.resourceName}?maxMembers=10000`,
+                cacheTtlSecs: 300
+              });
+              detailGroup = detailResponse.body;
+            } catch (detailError) {
+              logContactOperation('SYNC_GROUP_DETAIL_ERROR', group.resourceName, { error: detailError.message });
+              detailGroup = group;
+            }
+
+            // Use createGroupResult to populate ALL fields including the new checkboxes
+            const result = createGroupResult({
               resourceName: group.resourceName,
               etag: group.etag,
               name: group.name,
@@ -2275,10 +2438,12 @@ pack.addSyncTable({
               memberCount: detailGroup.memberCount || 0,
               memberResourceNames: detailGroup.memberResourceNames || []
             });
-          } catch (detailError) {
-            logContactOperation('SYNC_GROUP_DETAIL_ERROR', group.resourceName, { error: detailError.message });
-            // Still include the group with basic info if detail fetch fails
-            results.push({
+
+            results.push(result);
+          } catch (groupError) {
+            logContactOperation('SYNC_GROUP_ERROR', group.resourceName, { error: groupError.message });
+            // Still include basic group info if processing fails
+            const fallbackResult = createGroupResult({
               resourceName: group.resourceName,
               etag: group.etag,
               name: group.name,
@@ -2287,10 +2452,17 @@ pack.addSyncTable({
               memberCount: 0,
               memberResourceNames: []
             });
+            results.push(fallbackResult);
           }
         }
 
-        logContactOperation('SYNC_GROUPS_SUCCESS', 'all', { groupCount: results.length });
+        logContactOperation('SYNC_GROUPS_SUCCESS', 'all', { 
+          groupCount: results.length,
+          deprecated: results.filter(g => g.isDeprecated).length,
+          custom: results.filter(g => g.isCustomGroup).length,
+          modifiable: results.filter(g => g.canModify).length
+        });
+        
         return { result: results };
       } catch (error) {
         logContactOperation('SYNC_GROUPS_ERROR', 'all', { error: error.message });
@@ -2379,13 +2551,11 @@ pack.addSyncTable({
 
                 if (results.length >= limit) break;
               } catch (extractError) {
-                // Fix: Ensure resourceName is converted to string
                 const resourceName = String(person?.resourceName || 'unknown');
                 logContactOperation('EXTRACT_ERROR', resourceName, { error: extractError.message });
               }
             }
 
-            // Safety limit for pagination - increased for larger syncs
             if (pageCount > 20) break;
           } while (nextPageToken && results.length < limit);
         }
@@ -2422,13 +2592,11 @@ pack.addSyncTable({
 
                 if (results.length >= limit) break;
               } catch (extractError) {
-                // Fix: Ensure resourceName is converted to string
                 const resourceName = String(person?.resourceName || 'unknown');
                 logContactOperation('EXTRACT_OTHER_ERROR', resourceName, { error: extractError.message });
               }
             }
 
-            // Safety limit for pagination - increased for larger syncs
             if (pageCount > 20) break;
           } while (nextPageToken && results.length < limit);
         }
@@ -2443,8 +2611,7 @@ pack.addSyncTable({
         return { result: results };
       } catch (error) {
         logContactOperation('SYNC_CONTACTS_ERROR', 'all', { error: error.message });
-        
-        // Let 401 errors bubble up for automatic token refresh
+
         if (error.statusCode === 401) {
           throw error;
         }
@@ -2463,7 +2630,6 @@ pack.addSyncTable({
         try {
           return await updateContact(context, update);
         } catch (error) {
-          // Fix: Ensure resourceName is converted to string with proper fallback
           const resourceName = String(update?.previousValue?.resourceName || update?.newValue?.resourceName || 'unknown');
           logContactOperation('BATCH_UPDATE_ITEM_ERROR', resourceName, { error: error.message });
           return error;
@@ -2526,13 +2692,13 @@ pack.addFormula({
       return contact;
     } catch (error) {
       logContactOperation('READ_CONTACT_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
         throw new coda.UserVisibleError(`Contact not found: ${resourceName}`);
       } else if (error.statusCode === 403) {
         throw new coda.UserVisibleError('Permission denied. Please check your Google Contacts permissions.');
       }
-      
+
       throw new coda.UserVisibleError(`Failed to read contact: ${error.message}`);
     }
   }
@@ -2632,7 +2798,7 @@ pack.addFormula({
       description: "Primary address street 2",
       optional: true
     }),
-      coda.makeParameter({
+    coda.makeParameter({
       type: coda.ParameterType.String,
       name: "primaryAddressPostcode",
       description: "Primary address postcode",
@@ -2644,7 +2810,7 @@ pack.addFormula({
       description: "Primary address city",
       optional: true
     }),
-      coda.makeParameter({
+    coda.makeParameter({
       type: coda.ParameterType.String,
       name: "primaryAddressPOBox",
       description: "Primary address PO Box",
@@ -2749,18 +2915,18 @@ pack.addFormula({
 
 
       // Build primary address if provided
-    if (hasAddressContent(primaryAddressCountry, primaryAddressStreet, primaryAddressStreet2, primaryAddressPostcode, primaryAddressCity, primaryAddressPOBox)) {
-      contactData.addresses = [{
-        countryCode: convertCountryNameToCode(primaryAddressCountry || ''),
-        streetAddress: cleanAddressComponent(primaryAddressStreet || ''),
-        extendedAddress: cleanAddressComponent(primaryAddressStreet2 || ''),
-        postalCode: cleanAddressComponent(primaryAddressPostcode || ''),
-        city: cleanAddressComponent(primaryAddressCity || ''),
-        poBox: cleanAddressComponent(primaryAddressPOBox || ''),
-        type: mapLabelToGoogleType(primaryAddressLabel || 'other', 'address'),
-        metadata: { primary: true }
-      }];
-  } 
+      if (hasAddressContent(primaryAddressCountry, primaryAddressStreet, primaryAddressStreet2, primaryAddressPostcode, primaryAddressCity, primaryAddressPOBox)) {
+        contactData.addresses = [{
+          countryCode: convertCountryNameToCode(primaryAddressCountry || ''),
+          streetAddress: cleanAddressComponent(primaryAddressStreet || ''),
+          extendedAddress: cleanAddressComponent(primaryAddressStreet2 || ''),
+          postalCode: cleanAddressComponent(primaryAddressPostcode || ''),
+          city: cleanAddressComponent(primaryAddressCity || ''),
+          poBox: cleanAddressComponent(primaryAddressPOBox || ''),
+          type: mapLabelToGoogleType(primaryAddressLabel || 'other', 'address'),
+          metadata: { primary: true }
+        }];
+      }
 
       // Add personal info
       if (birthday) {
@@ -2806,9 +2972,9 @@ pack.addFormula({
           });
           logContactOperation('ADD_TO_GROUP_SUCCESS', createdContact.resourceName, { group: contactGroup });
         } catch (groupError) {
-          logContactOperation('ADD_TO_GROUP_ERROR', createdContact.resourceName, { 
-            group: contactGroup, 
-            error: groupError.message 
+          logContactOperation('ADD_TO_GROUP_ERROR', createdContact.resourceName, {
+            group: contactGroup,
+            error: groupError.message
           });
         }
       }
@@ -2832,7 +2998,7 @@ pack.addFormula({
       name: "resourceName",
       description: "Contact resource name"
     }),
-    
+
     // === CORE NAME FIELDS ===
     coda.makeParameter({
       type: coda.ParameterType.String,
@@ -3178,7 +3344,7 @@ pack.addFormula({
       description: "Department",
       optional: true
     }),
-    
+
     // === ADDRESS FIELDS (5 addresses) ===
     coda.makeParameter({
       type: coda.ParameterType.String,
@@ -3573,7 +3739,7 @@ pack.addFormula({
     try {
       logContactOperation('UPDATE_CONTACT_START', resourceName);
 
-      // Get current contact with fresh etag (CRITICAL: No caching for fresh etag)
+      // Get current contact with fresh etag (CRITICAL: No caching if wanting to get a fresh etag!)
       const getResponse = await context.fetcher.fetch({
         method: "GET",
         url: `https://people.googleapis.com/v1/${resourceName}?personFields=names,nicknames,emailAddresses,phoneNumbers,organizations,addresses,biographies,urls,birthdays,events,relations,userDefined`,
@@ -3611,10 +3777,10 @@ pack.addFormula({
 
       // Handle email updates (all 10 emails)
       if (primaryEmail !== undefined || email2 !== undefined || email3 !== undefined || email4 !== undefined || email5 !== undefined ||
-          email6 !== undefined || email7 !== undefined || email8 !== undefined || email9 !== undefined || email10 !== undefined ||
-          primaryEmailLabel !== undefined || email2Label !== undefined || email3Label !== undefined || email4Label !== undefined || email5Label !== undefined ||
-          email6Label !== undefined || email7Label !== undefined || email8Label !== undefined || email9Label !== undefined || email10Label !== undefined) {
-        
+        email6 !== undefined || email7 !== undefined || email8 !== undefined || email9 !== undefined || email10 !== undefined ||
+        primaryEmailLabel !== undefined || email2Label !== undefined || email3Label !== undefined || email4Label !== undefined || email5Label !== undefined ||
+        email6Label !== undefined || email7Label !== undefined || email8Label !== undefined || email9Label !== undefined || email10Label !== undefined) {
+
         const currentEmails = currentContact.emailAddresses || [];
         let emails = [];
 
@@ -3626,7 +3792,7 @@ pack.addFormula({
 
         emailParams.forEach(([emailValue, labelValue], index) => {
           let currentEmail, currentLabel;
-          
+
           if (index === 0) {
             // Primary email
             currentEmail = currentEmails.find((e: any) => e.metadata?.primary)?.value || '';
@@ -3648,7 +3814,7 @@ pack.addFormula({
           }
         });
 
-        // Add remaining current emails (beyond the 10 we're updating)
+        // Add remaining current emails
         const remainingEmails = currentEmails.slice(10);
         emails = [...emails, ...remainingEmails];
 
@@ -3658,10 +3824,10 @@ pack.addFormula({
 
       // Handle phone updates (all 10 phones)
       if (primaryPhone !== undefined || phone2 !== undefined || phone3 !== undefined || phone4 !== undefined || phone5 !== undefined ||
-          phone6 !== undefined || phone7 !== undefined || phone8 !== undefined || phone9 !== undefined || phone10 !== undefined ||
-          primaryPhoneLabel !== undefined || phone2Label !== undefined || phone3Label !== undefined || phone4Label !== undefined || phone5Label !== undefined ||
-          phone6Label !== undefined || phone7Label !== undefined || phone8Label !== undefined || phone9Label !== undefined || phone10Label !== undefined) {
-        
+        phone6 !== undefined || phone7 !== undefined || phone8 !== undefined || phone9 !== undefined || phone10 !== undefined ||
+        primaryPhoneLabel !== undefined || phone2Label !== undefined || phone3Label !== undefined || phone4Label !== undefined || phone5Label !== undefined ||
+        phone6Label !== undefined || phone7Label !== undefined || phone8Label !== undefined || phone9Label !== undefined || phone10Label !== undefined) {
+
         const currentPhones = currentContact.phoneNumbers || [];
         let phones = [];
 
@@ -3673,7 +3839,7 @@ pack.addFormula({
 
         phoneParams.forEach(([phoneValue, labelValue], index) => {
           let currentPhone, currentLabel;
-          
+
           if (index === 0) {
             // Primary phone
             currentPhone = currentPhones.find((p: any) => p.metadata?.primary)?.value || '';
@@ -3695,7 +3861,7 @@ pack.addFormula({
           }
         });
 
-        // Add remaining current phones (beyond the 10 we're updating)
+        // Add remaining current phones
         const remainingPhones = currentPhones.slice(10);
         phones = [...phones, ...remainingPhones];
 
@@ -3707,7 +3873,7 @@ pack.addFormula({
       if (organization !== undefined || jobTitle !== undefined || department !== undefined) {
         const currentOrgs = currentContact.organizations || [];
         const currentOrg = currentOrgs[0] || {};
-        
+
         const orgName = organization !== undefined ? organization : (currentOrg.name || "");
         const orgTitle = jobTitle !== undefined ? jobTitle : (currentOrg.title || "");
         const orgDept = department !== undefined ? department : (currentOrg.department || "");
@@ -3738,7 +3904,7 @@ pack.addFormula({
           const finalCountry = country !== undefined ? country : (convertCountryCodeToName(currentAddr.countryCode) || '');
           const finalStreet = street !== undefined ? street : (currentAddr.streetAddress || '');
           const finalStreet2 = street2 !== undefined ? street2 : (currentAddr.extendedAddress || '');
-          const finalPostcode = postcode !== undefined ? postcode : (currentAddr.postalCode || '');          
+          const finalPostcode = postcode !== undefined ? postcode : (currentAddr.postalCode || '');
           const finalCity = city !== undefined ? city : (currentAddr.city || '');
           const finalPoBox = poBox !== undefined ? poBox : (currentAddr.poBox || '');
           const finalLabel = label !== undefined ? label : (currentAddr.type || 'other');
@@ -3758,7 +3924,7 @@ pack.addFormula({
           }
         });
 
-        // Add remaining current addresses (beyond the 5 we're updating)
+        // Add remaining current addresses
         const remainingAddresses = currentAddresses.slice(5);
         addresses = [...addresses, ...remainingAddresses];
 
@@ -3816,7 +3982,7 @@ pack.addFormula({
           }
         });
 
-        // Add remaining current events (beyond the 3 we're updating)
+        // Add remaining current events
         const remainingEvents = currentEvents.slice(3);
         events = [...events, ...remainingEvents];
 
@@ -3832,12 +3998,12 @@ pack.addFormula({
 
       // Handle custom fields
       if (customField1 !== undefined || customField1Label !== undefined || customField2 !== undefined || customField2Label !== undefined ||
-          customField3 !== undefined || customField3Label !== undefined || customField4 !== undefined || customField4Label !== undefined ||
-          customField5 !== undefined || customField5Label !== undefined) {
-        
+        customField3 !== undefined || customField3Label !== undefined || customField4 !== undefined || customField4Label !== undefined ||
+        customField5 !== undefined || customField5Label !== undefined) {
+
         const currentUserDefined = currentContact.userDefined || [];
         const customFieldsData: { [key: string]: string } = {};
-        
+
         // Handle custom fields 1-5
         const customFieldParams = [
           [customField1, customField1Label, 'Custom Field 1'],
@@ -3849,7 +4015,7 @@ pack.addFormula({
 
         customFieldParams.forEach(([fieldValue, labelValue, defaultLabel], index) => {
           const currentField = currentUserDefined[index];
-          
+
           const finalValue = fieldValue !== undefined ? fieldValue : (currentField?.value || '');
           const finalLabel = labelValue !== undefined ? labelValue : (currentField?.key || defaultLabel);
 
@@ -3893,13 +4059,13 @@ pack.addFormula({
       return updatedContact;
     } catch (error) {
       logContactOperation('UPDATE_CONTACT_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
         throw new coda.UserVisibleError(`Contact not found: ${resourceName}`);
       } else if (error.statusCode === 409) {
         throw new coda.UserVisibleError('Contact was modified by another source. Please refresh and try again.');
       }
-      
+
       throw new coda.UserVisibleError(`Failed to update contact: ${error.message}`);
     }
   }
@@ -3940,13 +4106,13 @@ pack.addFormula({
       return `Contact deleted: ${resourceName}`;
     } catch (error) {
       logContactOperation('DELETE_CONTACT_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
         throw new coda.UserVisibleError(`Contact not found: ${resourceName}`);
       } else if (error.statusCode === 403) {
         throw new coda.UserVisibleError('Permission denied. You may not have permission to delete this contact.');
       }
-      
+
       throw new coda.UserVisibleError(`Failed to delete contact: ${error.message}`);
     }
   }
@@ -3963,11 +4129,11 @@ pack.addFormula({
       description: "Resource name of the contact to copy"
     }),
     coda.makeParameter({
-    type: coda.ParameterType.String,
-    name: "nameSuffix", 
-    description: "Suffix to add to name (default: 'Copy')",
-    optional: true
-  }),
+      type: coda.ParameterType.String,
+      name: "nameSuffix",
+      description: "Suffix to add to name (default: 'Copy')",
+      optional: true
+    }),
     coda.makeParameter({
       type: coda.ParameterType.Boolean,
       name: "copyEmails",
@@ -4211,27 +4377,502 @@ pack.addFormula({
   }
 });
 
+// Add Contact to Group
+pack.addFormula({
+  name: "AddContactToGroup",
+  description: "Add a contact to a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Contact group resource name (e.g., contactGroups/myContacts)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceName",
+      description: "Contact resource name (e.g., people/c123456789)"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([groupResourceName, contactResourceName], context) {
+    try {
+      // Pre-validation for deprecated groups
+      const deprecatedGroups = [
+        'contactGroups/friends',
+        'contactGroups/family',
+        'contactGroups/coworkers'
+      ];
+
+      if (deprecatedGroups.includes(groupResourceName)) {
+        const groupName = groupResourceName.split('/')[1];
+        throw new coda.UserVisibleError(
+          `❌ Cannot add contacts to deprecated "${groupName}" group.\n\n` +
+          `Google has deprecated this system group and it can no longer be modified.\n\n` +
+          `SOLUTIONS:\n` +
+          `• Create a custom group: CreateContactGroup("${groupName}")\n` +
+          `• Use "contactGroups/myContacts" for general contacts\n` +
+          `• Use "contactGroups/starred" for important contacts\n\n` +
+          `Deprecated groups: friends, family, coworkers`
+        );
+      }
+
+      logContactOperation('ADD_TO_GROUP_START', contactResourceName, { group: groupResourceName });
+
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToAdd: [contactResourceName]
+        })
+      });
+
+      logContactOperation('ADD_TO_GROUP_SUCCESS', contactResourceName, { group: groupResourceName });
+      return `✅ Contact successfully added to group: ${contactResourceName} → ${groupResourceName}`;
+    } catch (error) {
+      logContactOperation('ADD_TO_GROUP_ERROR', contactResourceName, { group: groupResourceName, error: error.message });
+
+      if (error.statusCode === 400 && error.message?.includes('deprecated system contact group')) {
+        const groupName = groupResourceName.split('/')[1] || 'system group';
+        throw new coda.UserVisibleError(
+          `Cannot modify deprecated "${groupName}" group.\n\n` +
+          `This Google system group is no longer supported.\n\n` +
+          `SOLUTIONS:\n` +
+          `• Create a custom group: CreateContactGroup("${groupName}")\n` +
+          `• Use "contactGroups/myContacts" instead\n` +
+          `• Use "contactGroups/starred" for important contacts`
+        );
+      } else if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(
+          `Contact or group not found.\n\n` +
+          `Please verify:\n` +
+          `• Contact exists: ${contactResourceName}\n` +
+          `• Group exists: ${groupResourceName}\n\n` +
+          `Use SearchContacts() to find contact resource names.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `Permission denied.\n\n` +
+          `You may not have permission to modify this contact group.\n` +
+          `Try reconnecting your Google account or check group permissions.`
+        );
+      }
+
+      throw new coda.UserVisibleError(`Failed to add contact to group: ${error.message}`);
+    }
+  }
+});
+
+// Remove Contact from Group
+pack.addFormula({
+  name: "RemoveContactFromGroup",
+  description: "Remove a contact from a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Contact group resource name (e.g., contactGroups/myContacts)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceName",
+      description: "Contact resource name (e.g., people/c123456789)"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([groupResourceName, contactResourceName], context) {
+    try {
+      // Pre-validate for deprecated groups
+      const deprecatedGroups = [
+        'contactGroups/friends',
+        'contactGroups/family',
+        'contactGroups/coworkers'
+      ];
+
+      if (deprecatedGroups.includes(groupResourceName)) {
+        const groupName = groupResourceName.split('/')[1];
+        throw new coda.UserVisibleError(
+          `Cannot remove contacts from deprecated "${groupName}" group.\n\n` +
+          `Google has deprecated this system group and it can no longer be modified.\n\n` +
+          `NOTE: If this contact is in a deprecated group, you cannot remove it via API.\n` +
+          `The contact will remain in this deprecated group until Google removes it.`
+        );
+      }
+
+      logContactOperation('REMOVE_FROM_GROUP_START', contactResourceName, { group: groupResourceName });
+
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToRemove: [contactResourceName]
+        })
+      });
+
+      logContactOperation('REMOVE_FROM_GROUP_SUCCESS', contactResourceName, { group: groupResourceName });
+      return `✅ Contact successfully removed from group: ${contactResourceName} ← ${groupResourceName}`;
+    } catch (error) {
+      logContactOperation('REMOVE_FROM_GROUP_ERROR', contactResourceName, { group: groupResourceName, error: error.message });
+
+      if (error.statusCode === 400 && error.message?.includes('deprecated system contact group')) {
+        const groupName = groupResourceName.split('/')[1] || 'system group';
+        throw new coda.UserVisibleError(
+          `Cannot modify deprecated "${groupName}" group.\n\n` +
+          `This Google system group is no longer supported.\n\n` +
+          `NOTE: Contacts in deprecated groups cannot be removed via API.`
+        );
+      } else if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(
+          `Contact or group not found.\n\n` +
+          `Please verify:\n` +
+          `• Contact exists: ${contactResourceName}\n` +
+          `• Group exists: ${groupResourceName}\n` +
+          `• Contact is actually in this group\n\n` +
+          `Use SearchContacts() to find contact resource names.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `Permission denied.\n\n` +
+          `You may not have permission to modify this contact group.\n` +
+          `Try reconnecting your Google account or check group permissions.`
+        );
+      }
+
+      throw new coda.UserVisibleError(`Failed to remove contact from group: ${error.message}`);
+    }
+  }
+});
+
+// Batch Add Contacts to Group
+pack.addFormula({
+  name: "BatchAddContactsToGroup",
+  description: "Add multiple contacts to a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Contact group resource name (e.g., contactGroups/myContacts)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceNames",
+      description: "Comma-separated list of contact resource names (e.g., 'people/c123,people/c456,people/c789')"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([groupResourceName, contactResourceNames], context) {
+    try {
+      // Pre-validate for deprecated groups
+      const deprecatedGroups = [
+        'contactGroups/friends',
+        'contactGroups/family',
+        'contactGroups/coworkers'
+      ];
+
+      if (deprecatedGroups.includes(groupResourceName)) {
+        const groupName = groupResourceName.split('/')[1];
+        throw new coda.UserVisibleError(
+          `Cannot add contacts to deprecated "${groupName}" group.\n\n` +
+          `Google has deprecated this system group and it can no longer be modified.\n\n` +
+          `SOLUTIONS:\n` +
+          `• Create a custom group: CreateContactGroup("${groupName}")\n` +
+          `• Use "contactGroups/myContacts" for general contacts\n` +
+          `• Use "contactGroups/starred" for important contacts\n\n` +
+          `Deprecated groups: friends, family, coworkers`
+        );
+      }
+
+      const resourceNames = contactResourceNames.split(',').map(name => name.trim()).filter(Boolean);
+
+      if (resourceNames.length === 0) {
+        throw new coda.UserVisibleError(
+          `No contact resource names provided.\n\n` +
+          `Please provide comma-separated contact resource names:\n` +
+          `Example: "people/c123,people/c456,people/c789"`
+        );
+      }
+
+      if (resourceNames.length > 500) {
+        throw new coda.UserVisibleError(
+          `Too many contacts (${resourceNames.length}).\n\n` +
+          `Maximum 500 contacts can be added at once.\n` +
+          `Please split into smaller batches.`
+        );
+      }
+
+      logContactOperation('BATCH_ADD_TO_GROUP_START', groupResourceName, { contacts: resourceNames.length });
+
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToAdd: resourceNames
+        })
+      });
+
+      logContactOperation('BATCH_ADD_TO_GROUP_SUCCESS', groupResourceName, { contacts: resourceNames.length });
+      return `✅ Successfully added ${resourceNames.length} contacts to group: ${groupResourceName}`;
+    } catch (error) {
+      logContactOperation('BATCH_ADD_TO_GROUP_ERROR', groupResourceName, { error: error.message });
+
+      if (error.statusCode === 400 && error.message?.includes('deprecated system contact group')) {
+        const groupName = groupResourceName.split('/')[1] || 'system group';
+        throw new coda.UserVisibleError(
+          `Cannot modify deprecated "${groupName}" group.\n\n` +
+          `This Google system group is no longer supported.\n\n` +
+          `SOLUTIONS:\n` +
+          `• Create a custom group: CreateContactGroup("${groupName}")\n` +
+          `• Use "contactGroups/myContacts" instead`
+        );
+      } else if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(
+          `Group not found: ${groupResourceName}\n\n` +
+          `Please check the group resource name.\n` +
+          `Use the ContactGroups sync table to see available groups.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `Permission denied.\n\n` +
+          `You may not have permission to modify this contact group.\n` +
+          `Try reconnecting your Google account or check group permissions.`
+        );
+      } else if (error.statusCode === 400) {
+        throw new coda.UserVisibleError(
+          `Invalid request.\n\n` +
+          `Check that:\n` +
+          `• All contact resource names are valid\n` +
+          `• Contact resource names are formatted correctly (people/c...)\n` +
+          `• Contacts exist and are accessible\n\n` +
+          `Error details: ${error.message}`
+        );
+      }
+
+      throw new coda.UserVisibleError(`Failed to add contacts to group: ${error.message}`);
+    }
+  }
+});
+
+// Batch Remove Contacts from Group
+pack.addFormula({
+  name: "BatchRemoveContactsFromGroup",
+  description: "Remove multiple contacts from a contact group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupResourceName",
+      description: "Contact group resource name (e.g., contactGroups/myContacts)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "contactResourceNames",
+      description: "Comma-separated list of contact resource names (e.g., 'people/c123,people/c456,people/c789')"
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+  execute: async function ([groupResourceName, contactResourceNames], context) {
+    try {
+      // Pre-validate for deprecated groups
+      const deprecatedGroups = [
+        'contactGroups/friends',
+        'contactGroups/family',
+        'contactGroups/coworkers'
+      ];
+
+      if (deprecatedGroups.includes(groupResourceName)) {
+        const groupName = groupResourceName.split('/')[1];
+        throw new coda.UserVisibleError(
+          `Cannot remove contacts from deprecated "${groupName}" group.\n\n` +
+          `Google has deprecated this system group and it can no longer be modified.\n\n` +
+          `NOTE: Contacts in deprecated groups cannot be removed via API.\n` +
+          `They will remain until Google removes the deprecated group.`
+        );
+      }
+
+      const resourceNames = contactResourceNames.split(',').map(name => name.trim()).filter(Boolean);
+
+      if (resourceNames.length === 0) {
+        throw new coda.UserVisibleError(
+          `No contact resource names provided.\n\n` +
+          `Please provide comma-separated contact resource names:\n` +
+          `Example: "people/c123,people/c456,people/c789"`
+        );
+      }
+
+      if (resourceNames.length > 500) {
+        throw new coda.UserVisibleError(
+          `Too many contacts (${resourceNames.length}).\n\n` +
+          `Maximum 500 contacts can be removed at once.\n` +
+          `Please split into smaller batches.`
+        );
+      }
+
+      logContactOperation('BATCH_REMOVE_FROM_GROUP_START', groupResourceName, { contacts: resourceNames.length });
+
+      await context.fetcher.fetch({
+        method: "POST",
+        url: `https://people.googleapis.com/v1/${groupResourceName}/members:modify`,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceNamesToRemove: resourceNames
+        })
+      });
+
+      logContactOperation('BATCH_REMOVE_FROM_GROUP_SUCCESS', groupResourceName, { contacts: resourceNames.length });
+      return `✅ Successfully removed ${resourceNames.length} contacts from group: ${groupResourceName}`;
+    } catch (error) {
+      logContactOperation('BATCH_REMOVE_FROM_GROUP_ERROR', groupResourceName, { error: error.message });
+
+      if (error.statusCode === 400 && error.message?.includes('deprecated system contact group')) {
+        const groupName = groupResourceName.split('/')[1] || 'system group';
+        throw new coda.UserVisibleError(
+          `Cannot modify deprecated "${groupName}" group.\n\n` +
+          `This Google system group is no longer supported.\n\n` +
+          `NOTE: Contacts in deprecated groups cannot be removed via API.`
+        );
+      } else if (error.statusCode === 404) {
+        throw new coda.UserVisibleError(
+          `Group not found: ${groupResourceName}\n\n` +
+          `Please check the group resource name.\n` +
+          `Use the ContactGroups sync table to see available groups.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `Permission denied.\n\n` +
+          `You may not have permission to modify this contact group.\n` +
+          `Try reconnecting your Google account or check group permissions.`
+        );
+      } else if (error.statusCode === 400) {
+        throw new coda.UserVisibleError(
+          `Invalid request.\n\n` +
+          `Check that:\n` +
+          `• All contact resource names are valid\n` +
+          `• Contact resource names are formatted correctly (people/c...)\n` +
+          `• Contacts exist and are accessible\n` +
+          `• Contacts are actually in this group\n\n` +
+          `Error details: ${error.message}`
+        );
+      }
+
+      throw new coda.UserVisibleError(`Failed to remove contacts from group: ${error.message}`);
+    }
+  }
+});
+
+// Search Contacts (helpful for finding resource names)
+pack.addFormula({
+  name: "SearchContacts",
+  description: "Search for contacts by name, email, or other fields",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "query",
+      description: "Search query (name, email, phone, organization)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Number,
+      name: "maxResults",
+      description: "Maximum number of results to return (default: 10, max: 50)",
+      optional: true
+    })
+  ],
+  resultType: coda.ValueType.Array,
+  items: ContactSchema,
+  execute: async function ([query, maxResults], context) {
+    try {
+      if (!query || !query.trim()) {
+        throw new coda.UserVisibleError("Search query is required");
+      }
+
+      const limit = Math.min(maxResults || 10, 50);
+      logContactOperation('SEARCH_CONTACTS_START', query, { maxResults: limit });
+
+      const response = await context.fetcher.fetch({
+        method: "GET",
+        url: `https://people.googleapis.com/v1/people:searchContacts?query=${encodeURIComponent(query)}&pageSize=${limit}&readMask=names,emailAddresses,phoneNumbers,organizations,addresses,memberships,photos,metadata`,
+        cacheTtlSecs: 60
+      });
+
+      const people = response.body.results || [];
+      const results = people.map((result: any) => {
+        try {
+          return extractContactData(result.person);
+        } catch (extractError) {
+          logContactOperation('SEARCH_EXTRACT_ERROR', result.person?.resourceName || 'unknown', { error: extractError.message });
+          return null;
+        }
+      }).filter(Boolean);
+
+      logContactOperation('SEARCH_CONTACTS_SUCCESS', query, { resultCount: results.length });
+      return results;
+    } catch (error) {
+      logContactOperation('SEARCH_CONTACTS_ERROR', query, { error: error.message });
+      throw new coda.UserVisibleError(`Failed to search contacts: ${error.message}`);
+    }
+  }
+});
+
 // CREATE CONTACT GROUP
 pack.addFormula({
   name: "CreateContactGroup",
-  description: "Create a new contact group",
+  description: "Create a new custom contact group with status information",
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
       name: "name",
       description: "Name of the contact group"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Boolean,
+      name: "skipIfExists",
+      description: "Skip creation if a group with this name already exists (default: false)",
+      optional: true
     })
   ],
   resultType: coda.ValueType.Object,
   schema: ContactGroupSchema,
   isAction: true,
-  execute: async function ([name], context) {
+  execute: async function ([name, skipIfExists], context) {
     try {
       if (!name || !name.trim()) {
-        throw new coda.UserVisibleError("Group name is required");
+        throw new coda.UserVisibleError(
+          `ERROR: Group name is required.\n\n` +
+          `Please provide a valid name for the contact group.`
+        );
       }
 
-      logContactOperation('CREATE_GROUP_START', name);
+      const trimmedName = name.trim();
+
+      // Check for existing groups if skipIfExists is true
+      if (skipIfExists) {
+        try {
+          const existingResponse = await context.fetcher.fetch({
+            method: "GET",
+            url: "https://people.googleapis.com/v1/contactGroups?pageSize=1000",
+            cacheTtlSecs: 60
+          });
+
+          const existingGroups = existingResponse.body.contactGroups || [];
+          const existingGroup = existingGroups.find((g: any) =>
+            g.name === trimmedName || g.formattedName === trimmedName
+          );
+
+          if (existingGroup) {
+            logContactOperation('CREATE_GROUP_SKIPPED', trimmedName, { reason: 'Already exists' });
+            return createGroupResult(existingGroup);
+          }
+        } catch (checkError) {
+          // Continue with creation if check fails
+          logContactOperation('CREATE_GROUP_CHECK_FAILED', trimmedName, { error: checkError.message });
+        }
+      }
+
+      logContactOperation('CREATE_GROUP_START', trimmedName);
 
       const response = await context.fetcher.fetch({
         method: "POST",
@@ -4239,27 +4880,43 @@ pack.addFormula({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contactGroup: {
-            name: name.trim()
+            name: trimmedName
           }
         })
       });
 
       const group = response.body;
-      const result = {
-        resourceName: group.resourceName,
-        etag: group.etag,
-        name: group.name,
-        formattedName: group.formattedName,
-        groupType: group.groupType,
-        memberCount: 0,
-        memberResourceNames: []
-      };
+      const result = createGroupResult(group);
 
       logContactOperation('CREATE_GROUP_SUCCESS', result.resourceName);
       return result;
     } catch (error) {
       logContactOperation('CREATE_GROUP_ERROR', name, { error: error.message });
-      throw new coda.UserVisibleError(`Failed to create contact group: ${error.message}`);
+
+      if (error.statusCode === 400) {
+        throw new coda.UserVisibleError(
+          `ERROR: Invalid group name: "${name}"\n\n` +
+          `Please check that:\n` +
+          `• Name is not empty or whitespace only\n` +
+          `• Name doesn't contain invalid characters\n` +
+          `• Name is not already in use\n\n` +
+          `Error details: ${error.message}`
+        );
+      } else if (error.statusCode === 409) {
+        throw new coda.UserVisibleError(
+          `ERROR: Group name conflict: "${name}"\n\n` +
+          `A group with this name may already exist.\n` +
+          `Try using skipIfExists=true to handle existing groups gracefully.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `ERROR: Permission denied.\n\n` +
+          `You may not have permission to create contact groups.\n` +
+          `Try reconnecting your Google account.`
+        );
+      }
+
+      throw new coda.UserVisibleError(`ERROR: Failed to create contact group: ${error.message}`);
     }
   }
 });
@@ -4267,47 +4924,66 @@ pack.addFormula({
 // READ CONTACT GROUP
 pack.addFormula({
   name: "ReadContactGroup",
-  description: "Read detailed information about a specific contact group",
+  description: "Read detailed information about a specific contact group with status",
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
       name: "resourceName",
-      description: "Contact group resource name"
+      description: "Contact group resource name (e.g., contactGroups/myContacts)"
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Boolean,
+      name: "includeMemberDetails",
+      description: "Include detailed member information (default: false for performance)",
+      optional: true
     })
   ],
   resultType: coda.ValueType.Object,
   schema: ContactGroupSchema,
-  execute: async function ([resourceName], context) {
+  execute: async function ([resourceName, includeMemberDetails], context) {
     try {
+      if (!resourceName || !resourceName.trim()) {
+        throw new coda.UserVisibleError(
+          `ERROR: Group resource name is required.\n\n` +
+          `Example: "contactGroups/myContacts"`
+        );
+      }
+
       logContactOperation('READ_GROUP_START', resourceName);
 
+      const maxMembers = includeMemberDetails ? 10000 : 0;
       const response = await context.fetcher.fetch({
         method: "GET",
-        url: `https://people.googleapis.com/v1/${resourceName}?maxMembers=10000`,
+        url: `https://people.googleapis.com/v1/${resourceName}?maxMembers=${maxMembers}`,
         cacheTtlSecs: 60
       });
 
       const group = response.body;
-      const result = {
-        resourceName: group.resourceName,
-        etag: group.etag,
-        name: group.name,
-        formattedName: group.formattedName,
-        groupType: group.groupType,
-        memberCount: group.memberCount || 0,
-        memberResourceNames: group.memberResourceNames || []
-      };
+      const result = createGroupResult(group);
 
       logContactOperation('READ_GROUP_SUCCESS', resourceName);
       return result;
     } catch (error) {
       logContactOperation('READ_GROUP_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
-        throw new coda.UserVisibleError(`Contact group not found: ${resourceName}`);
+        throw new coda.UserVisibleError(
+          `ERROR: Contact group not found: ${resourceName}\n\n` +
+          `Please verify:\n` +
+          `• The resource name is correct\n` +
+          `• The group exists and is accessible\n` +
+          `• You have permission to access this group\n\n` +
+          `Use the ContactGroups sync table to see available groups.`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `ERROR: Permission denied.\n\n` +
+          `You may not have access to this contact group.\n` +
+          `Try reconnecting your Google account.`
+        );
       }
-      
-      throw new coda.UserVisibleError(`Failed to read contact group: ${error.message}`);
+
+      throw new coda.UserVisibleError(`ERROR: Failed to read contact group: ${error.message}`);
     }
   }
 });
@@ -4315,7 +4991,7 @@ pack.addFormula({
 // UPDATE CONTACT GROUP
 pack.addFormula({
   name: "UpdateContactGroup",
-  description: "Update a contact group's name",
+  description: "Update a contact group's name with validation and error handling",
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
@@ -4330,18 +5006,69 @@ pack.addFormula({
     coda.makeParameter({
       type: coda.ParameterType.String,
       name: "etag",
-      description: "ETag of the contact group (get from ReadContactGroup)"
+      description: "ETag of the contact group (get from ReadContactGroup or sync table)",
+      optional: true
     })
   ],
   resultType: coda.ValueType.String,
   isAction: true,
   execute: async function ([resourceName, newName, etag], context) {
     try {
-      if (!newName || !newName.trim()) {
-        throw new coda.UserVisibleError("New group name is required");
+      if (!resourceName || !resourceName.trim()) {
+        throw new coda.UserVisibleError(
+          `ERROR: Group resource name is required.\n\n` +
+          `Example: "contactGroups/abc123def456"`
+        );
       }
 
-      logContactOperation('UPDATE_GROUP_START', resourceName);
+      if (!newName || !newName.trim()) {
+        throw new coda.UserVisibleError(
+          `ERROR: New group name is required.\n\n` +
+          `Please provide a valid name for the contact group.`
+        );
+      }
+
+      // Check if this is a modifiable group
+      const analysis = analyzeContactGroup(resourceName);
+      if (!analysis.canModify) {
+        if (analysis.isDeprecated) {
+          const groupName = resourceName.split('/')[1];
+          throw new coda.UserVisibleError(
+            `ERROR: Cannot update deprecated "${groupName}" group.\n\n` +
+            `This Google system group is no longer supported.\n\n` +
+            `SOLUTION: Create a custom group instead:\n` +
+            `CreateContactGroup("${newName.trim()}")`
+          );
+        } else {
+          throw new coda.UserVisibleError(
+            `ERROR: Cannot update system group.\n\n` +
+            `This system group cannot be renamed.\n\n` +
+            `SOLUTION: Create a custom group instead:\n` +
+            `CreateContactGroup("${newName.trim()}")`
+          );
+        }
+      }
+
+      // Get current etag if not provided
+      let currentEtag = etag;
+      if (!currentEtag) {
+        try {
+          const currentResponse = await context.fetcher.fetch({
+            method: "GET",
+            url: `https://people.googleapis.com/v1/${resourceName}`,
+            cacheTtlSecs: 0
+          });
+          currentEtag = currentResponse.body.etag;
+        } catch (etagError) {
+          logContactOperation('UPDATE_GROUP_ETAG_ERROR', resourceName, { error: etagError.message });
+          throw new coda.UserVisibleError(
+            `ERROR: Could not get current group information.\n\n` +
+            `Please provide the etag parameter or ensure the group exists.`
+          );
+        }
+      }
+
+      logContactOperation('UPDATE_GROUP_START', resourceName, { newName: newName.trim() });
 
       await context.fetcher.fetch({
         method: "PUT",
@@ -4350,23 +5077,45 @@ pack.addFormula({
         body: JSON.stringify({
           contactGroup: {
             name: newName.trim(),
-            etag: etag
+            etag: currentEtag
           }
         })
       });
 
       logContactOperation('UPDATE_GROUP_SUCCESS', resourceName);
-      return `Contact group name updated: ${resourceName}`;
+      return `SUCCESS: Contact group name updated to "${newName.trim()}"`;
     } catch (error) {
       logContactOperation('UPDATE_GROUP_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
-        throw new coda.UserVisibleError(`Contact group not found: ${resourceName}`);
+        throw new coda.UserVisibleError(
+          `ERROR: Contact group not found: ${resourceName}\n\n` +
+          `The group may have been deleted or the resource name is incorrect.`
+        );
       } else if (error.statusCode === 409) {
-        throw new coda.UserVisibleError('Contact group was modified by another source. Please refresh and try again.');
+        throw new coda.UserVisibleError(
+          `ERROR: Contact group was modified by another source.\n\n` +
+          `Please refresh the group information and try again.\n` +
+          `The etag may be outdated.`
+        );
+      } else if (error.statusCode === 400) {
+        throw new coda.UserVisibleError(
+          `ERROR: Invalid update request.\n\n` +
+          `Please check:\n` +
+          `• New name is valid: "${newName}"\n` +
+          `• ETag is current\n` +
+          `• Group can be modified\n\n` +
+          `Error details: ${error.message}`
+        );
+      } else if (error.statusCode === 403) {
+        throw new coda.UserVisibleError(
+          `ERROR: Permission denied.\n\n` +
+          `You may not have permission to update this contact group.\n` +
+          `Try reconnecting your Google account.`
+        );
       }
-      
-      throw new coda.UserVisibleError(`Failed to update contact group: ${error.message}`);
+
+      throw new coda.UserVisibleError(`ERROR: Failed to update contact group: ${error.message}`);
     }
   }
 });
@@ -4374,7 +5123,7 @@ pack.addFormula({
 // DELETE CONTACT GROUP
 pack.addFormula({
   name: "DeleteContactGroup",
-  description: "Delete a contact group",
+  description: "Delete a contact group with validation and safety checks",
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
@@ -4384,17 +5133,80 @@ pack.addFormula({
     coda.makeParameter({
       type: coda.ParameterType.Boolean,
       name: "deleteContacts",
-      description: "Also delete all contacts in the group (default: false)",
+      description: "Also delete all contacts in the group (DANGEROUS - default: false)",
+      optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Boolean,
+      name: "confirmDeletion",
+      description: "Confirm you want to delete this group (required for safety)",
       optional: true
     })
   ],
   resultType: coda.ValueType.String,
   isAction: true,
-  execute: async function ([resourceName, deleteContacts], context) {
+  execute: async function ([resourceName, deleteContacts, confirmDeletion], context) {
     try {
-      logContactOperation('DELETE_GROUP_START', resourceName);
+      if (!resourceName || !resourceName.trim()) {
+        throw new coda.UserVisibleError(
+          `ERROR: Group resource name is required.\n\n` +
+          `Example: "contactGroups/abc123def456"`
+        );
+      }
+
+      if (!confirmDeletion) {
+        throw new coda.UserVisibleError(
+          `ERROR: Deletion confirmation required.\n\n` +
+          `Set confirmDeletion=true to confirm you want to delete this group.\n` +
+          `This action cannot be undone.`
+        );
+      }
+
+      // Check if this is a deletable group
+      const analysis = analyzeContactGroup(resourceName);
+      if (!analysis.isCustomGroup) {
+        if (analysis.isDeprecated) {
+          const groupName = resourceName.split('/')[1];
+          throw new coda.UserVisibleError(
+            `ERROR: Cannot delete deprecated "${groupName}" group.\n\n` +
+            `Deprecated system groups cannot be deleted via API.\n` +
+            `Google will eventually remove them automatically.`
+          );
+        } else {
+          throw new coda.UserVisibleError(
+            `ERROR: Cannot delete system group.\n\n` +
+            `System contact groups cannot be deleted.\n` +
+            `Only custom groups (created by users) can be deleted.`
+          );
+        }
+      }
+
+      // Get group info for logging
+      let groupInfo;
+      try {
+        const infoResponse = await context.fetcher.fetch({
+          method: "GET",
+          url: `https://people.googleapis.com/v1/${resourceName}?maxMembers=0`,
+          cacheTtlSecs: 0
+        });
+        groupInfo = infoResponse.body;
+      } catch (infoError) {
+        logContactOperation('DELETE_GROUP_INFO_ERROR', resourceName, { error: infoError.message });
+      }
 
       const shouldDeleteContacts = deleteContacts === true;
+      if (shouldDeleteContacts && groupInfo?.memberCount > 0) {
+        logContactOperation('DELETE_GROUP_WARNING', resourceName, {
+          memberCount: groupInfo.memberCount,
+          deleteContacts: true
+        });
+      }
+
+      logContactOperation('DELETE_GROUP_START', resourceName, {
+        deleteContacts: shouldDeleteContacts,
+        memberCount: groupInfo?.memberCount || 0
+      });
+
       const url = `https://people.googleapis.com/v1/${resourceName}${shouldDeleteContacts ? '?deleteContacts=true' : ''}`;
 
       await context.fetcher.fetch({
@@ -4402,18 +5214,116 @@ pack.addFormula({
         url: url
       });
 
+      const deletionMessage = shouldDeleteContacts && groupInfo?.memberCount > 0
+        ? `WARNING: Contact group and ${groupInfo.memberCount} contacts deleted: ${resourceName}`
+        : `SUCCESS: Contact group deleted: ${resourceName}`;
+
       logContactOperation('DELETE_GROUP_SUCCESS', resourceName);
-      return `Contact group deleted: ${resourceName}`;
+      return deletionMessage;
     } catch (error) {
       logContactOperation('DELETE_GROUP_ERROR', resourceName, { error: error.message });
-      
+
       if (error.statusCode === 404) {
-        throw new coda.UserVisibleError(`Contact group not found: ${resourceName}`);
+        throw new coda.UserVisibleError(
+          `ERROR: Contact group not found: ${resourceName}\n\n` +
+          `The group may have already been deleted or the resource name is incorrect.`
+        );
       } else if (error.statusCode === 403) {
-        throw new coda.UserVisibleError('Permission denied. You may not have permission to delete this contact group.');
+        throw new coda.UserVisibleError(
+          `ERROR: Permission denied.\n\n` +
+          `You may not have permission to delete this contact group.\n` +
+          `Note: Only custom groups can be deleted, not system groups.`
+        );
+      } else if (error.statusCode === 400) {
+        throw new coda.UserVisibleError(
+          `ERROR: Invalid deletion request.\n\n` +
+          `This group cannot be deleted. Possible reasons:\n` +
+          `• It's a system group (only custom groups can be deleted)\n` +
+          `• It's a deprecated group\n` +
+          `• Invalid resource name format\n\n` +
+          `Error details: ${error.message}`
+        );
       }
-      
-      throw new coda.UserVisibleError(`Failed to delete contact group: ${error.message}`);
+
+      throw new coda.UserVisibleError(`ERROR: Failed to delete contact group: ${error.message}`);
+    }
+  }
+});
+
+// LIST MODIFIABLE CONTACT GROUPS
+pack.addFormula({
+  name: "ListModifiableContactGroups",
+  description: "List all contact groups that can be safely modified (excludes deprecated and read-only groups)",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.Boolean,
+      name: "customGroupsOnly",
+      description: "Show only user-created custom groups (default: false)",
+      optional: true
+    })
+  ],
+  resultType: coda.ValueType.Array,
+  items: ContactGroupSchema,
+  execute: async function ([customGroupsOnly], context) {
+    try {
+      logContactOperation('LIST_MODIFIABLE_GROUPS_START', 'all', { customOnly: customGroupsOnly });
+
+      const response = await context.fetcher.fetch({
+        method: "GET",
+        url: "https://people.googleapis.com/v1/contactGroups?pageSize=1000",
+        cacheTtlSecs: 300
+      });
+
+      const groups = response.body.contactGroups || [];
+      const results = [];
+
+      for (const group of groups) {
+        try {
+          const analysis = analyzeContactGroup(group.resourceName, group.groupType);
+
+          // Filter based on requirements
+          if (!analysis.canModify) continue;
+          if (customGroupsOnly && !analysis.isCustomGroup) continue;
+
+          // Get detailed member info for modifiable groups
+          let detailGroup;
+          try {
+            const detailResponse = await context.fetcher.fetch({
+              method: "GET",
+              url: `https://people.googleapis.com/v1/${group.resourceName}?maxMembers=10000`,
+              cacheTtlSecs: 300
+            });
+            detailGroup = detailResponse.body;
+          } catch (detailError) {
+            logContactOperation('LIST_GROUP_DETAIL_ERROR', group.resourceName, { error: detailError.message });
+            detailGroup = group;
+          }
+
+          const result = createGroupResult({
+            ...detailGroup,
+            resourceName: group.resourceName,
+            etag: group.etag,
+            name: group.name,
+            formattedName: group.formattedName,
+            groupType: group.groupType
+          });
+
+          results.push(result);
+        } catch (groupError) {
+          logContactOperation('LIST_GROUP_ERROR', group.resourceName, { error: groupError.message });
+        }
+      }
+
+      logContactOperation('LIST_MODIFIABLE_GROUPS_SUCCESS', 'all', {
+        totalGroups: groups.length,
+        modifiableGroups: results.length,
+        customOnly: customGroupsOnly
+      });
+
+      return results;
+    } catch (error) {
+      logContactOperation('LIST_MODIFIABLE_GROUPS_ERROR', 'all', { error: error.message });
+      throw new coda.UserVisibleError(`ERROR: Failed to list modifiable contact groups: ${error.message}`);
     }
   }
 });
@@ -4436,169 +5346,169 @@ pack.addFormula({
       // If no resourceName provided, give comprehensive overview
       if (!resourceName || !resourceName.trim()) {
         return "GOOGLE CONTACTS OVERVIEW\n\n" +
-               "Google Contacts has two distinct types with different capabilities:\n\n" +
-               
-               "REGULAR CONTACTS (people/c...):\n" +
-               "   • Full CRUD operations (Create, Read, Update, Delete)\n" +
-               "   • All fields are editable (names, emails, phones, addresses, etc.)\n" +
-               "   • Can be organized into contact groups\n" +
-               "   • Support custom fields and relationships\n" +
-               "   • Two-way sync with Coda tables\n" +
-               "   • Can be managed via formulas and sync tables\n\n" +
-               
-               "OTHER CONTACTS (otherContacts/c...):\n" +
-               "   • Cannot be deleted (Google API limitation)\n" +
-               "   • Cannot be directly edited or updated\n" +
-               "   • Limited field access (names, emails, phones only)\n" +
-               "   • Cannot be added to contact groups\n" +
-               "   • Read-only by design\n" +
-               "   • Auto-generated from Gmail interactions\n\n" +
-               
-               "TO ANALYZE A SPECIFIC CONTACT:\n" +
-               "Provide a contact's resourceName to get targeted information and solutions.\n\n" +
-               
-               "COMMON SOLUTIONS:\n" +
-               "• Use 'CopyOtherContactToContacts' to convert Other Contacts to editable Regular Contacts\n" +
-               "• Use contact groups to organize Regular Contacts efficiently\n" +
-               "• Use sync tables for bulk contact management";
+          "Google Contacts has two distinct types with different capabilities:\n\n" +
+
+          "REGULAR CONTACTS (people/c...):\n" +
+          "   • Full CRUD operations (Create, Read, Update, Delete)\n" +
+          "   • All fields are editable (names, emails, phones, addresses, etc.)\n" +
+          "   • Can be organized into contact groups\n" +
+          "   • Support custom fields and relationships\n" +
+          "   • Two-way sync with Coda tables\n" +
+          "   • Can be managed via formulas and sync tables\n\n" +
+
+          "OTHER CONTACTS (otherContacts/c...):\n" +
+          "   • Cannot be deleted (Google API limitation)\n" +
+          "   • Cannot be directly edited or updated\n" +
+          "   • Limited field access (names, emails, phones only)\n" +
+          "   • Cannot be added to contact groups\n" +
+          "   • Read-only by design\n" +
+          "   • Auto-generated from Gmail interactions\n\n" +
+
+          "TO ANALYZE A SPECIFIC CONTACT:\n" +
+          "Provide a contact's resourceName to get targeted information and solutions.\n\n" +
+
+          "COMMON SOLUTIONS:\n" +
+          "• Use 'CopyOtherContactToContacts' to convert Other Contacts to editable Regular Contacts\n" +
+          "• Use contact groups to organize Regular Contacts efficiently\n" +
+          "• Use sync tables for bulk contact management";
       }
 
       const isOtherContact = resourceName.includes('otherContacts/');
       const isRegularContact = resourceName.includes('people/');
-      
+
       if (isOtherContact) {
         return "OTHER CONTACT LIMITATIONS\n\n" +
-               `Contact: ${resourceName}\n\n` +
-               
-               "WHAT YOU CANNOT DO:\n" +
-               "• Delete this contact (Google API restriction)\n" +
-               "• Edit or update any fields directly\n" +
-               "• Add to contact groups\n" +
-               "• Modify via sync table updates\n" +
-               "• Access advanced fields (addresses, custom fields, etc.)\n\n" +
-               
-               "WHY THESE LIMITATIONS EXIST:\n" +
-               "Other Contacts are automatically generated from your Gmail interactions " +
-               "and are designed to be read-only references. Google maintains them as " +
-               "lightweight contact records without full contact capabilities.\n\n" +
-               
-               "RECOMMENDED SOLUTIONS:\n\n" +
-               
-               "1. CONVERT TO REGULAR CONTACT:\n" +
-               `   Use: CopyOtherContactToContacts("${resourceName}")\n` +
-               "   Result: Creates an editable Regular Contact with the same data\n\n" +
-               
-               "2. SELECTIVE FIELD COPYING:\n" +
-               `   Use: CopyOtherContactToContacts("${resourceName}", true, true, false)\n` +
-               "   Options: (copyNames, copyEmails, copyPhones)\n\n" +
-               
-               "3. AFTER CONVERSION:\n" +
-               "   • The new Regular Contact can be fully edited\n" +
-               "   • Can be deleted if no longer needed\n" +
-               "   • Can be added to contact groups\n" +
-               "   • Original Other Contact remains unchanged\n" +
-               "   • Use UpdateContact() or sync table for modifications\n\n" +
-               
-               "BEST PRACTICE:\n" +
-               "Convert important Other Contacts to Regular Contacts for full management capabilities.";
-      } 
-      
+          `Contact: ${resourceName}\n\n` +
+
+          "WHAT YOU CANNOT DO:\n" +
+          "• Delete this contact (Google API restriction)\n" +
+          "• Edit or update any fields directly\n" +
+          "• Add to contact groups\n" +
+          "• Modify via sync table updates\n" +
+          "• Access advanced fields (addresses, custom fields, etc.)\n\n" +
+
+          "WHY THESE LIMITATIONS EXIST:\n" +
+          "Other Contacts are automatically generated from your Gmail interactions " +
+          "and are designed to be read-only references. Google maintains them as " +
+          "lightweight contact records without full contact capabilities.\n\n" +
+
+          "RECOMMENDED SOLUTIONS:\n\n" +
+
+          "1. CONVERT TO REGULAR CONTACT:\n" +
+          `   Use: CopyOtherContactToContacts("${resourceName}")\n` +
+          "   Result: Creates an editable Regular Contact with the same data\n\n" +
+
+          "2. SELECTIVE FIELD COPYING:\n" +
+          `   Use: CopyOtherContactToContacts("${resourceName}", true, true, false)\n` +
+          "   Options: (copyNames, copyEmails, copyPhones)\n\n" +
+
+          "3. AFTER CONVERSION:\n" +
+          "   • The new Regular Contact can be fully edited\n" +
+          "   • Can be deleted if no longer needed\n" +
+          "   • Can be added to contact groups\n" +
+          "   • Original Other Contact remains unchanged\n" +
+          "   • Use UpdateContact() or sync table for modifications\n\n" +
+
+          "BEST PRACTICE:\n" +
+          "Convert important Other Contacts to Regular Contacts for full management capabilities.";
+      }
+
       else if (isRegularContact) {
         return "REGULAR CONTACT CAPABILITIES\n\n" +
-               `Contact: ${resourceName}\n\n` +
-               
-               "FULL OPERATIONS AVAILABLE:\n\n" +
-               
-               "CREATE & UPDATE:\n" +
-               "• Use CreateContact() for new contacts\n" +
-               "• Use UpdateContact() for modifications\n" +
-               "• Edit directly in sync tables with two-way sync\n" +
-               "• Support for 10 emails, 10 phones, 5 addresses\n" +
-               "• Custom fields, relationships, and significant dates\n\n" +
-               
-               "DELETE:\n" +
-               `• Use DeleteContact("${resourceName}")\n` +
-               "• Remove from sync tables\n" +
-               "• Permanent removal from Google Contacts\n\n" +
-               
-               "GROUP MANAGEMENT:\n" +
-               "• Add to contact groups for organization\n" +
-               "• Use AddContactToGroup() and RemoveContactFromGroup()\n" +
-               "• Filter sync tables by group membership\n\n" +
-               
-               "ADVANCED FEATURES:\n" +
-               "• Full field access (names, emails, phones, addresses)\n" +
-               "• Organization details (company, job title, department)\n" +
-               "• Personal information (birthday, website, notes)\n" +
-               "• Custom fields for specialized data\n" +
-               "• Relationship tracking\n\n" +
-               
-               "SYNC & AUTOMATION:\n" +
-               "• Two-way sync with Coda tables\n" +
-               "• Bulk operations via sync table\n" +
-               "• Formula-based automation\n" +
-               "• Real-time updates\n\n" +
-               
-               "RECOMMENDED ACTIONS:\n" +
-               "• Use sync tables for bulk management\n" +
-               "• Organize with contact groups\n" +
-               "• Leverage custom fields for business data\n" +
-               "• Set up automations for contact workflows";
+          `Contact: ${resourceName}\n\n` +
+
+          "FULL OPERATIONS AVAILABLE:\n\n" +
+
+          "CREATE & UPDATE:\n" +
+          "• Use CreateContact() for new contacts\n" +
+          "• Use UpdateContact() for modifications\n" +
+          "• Edit directly in sync tables with two-way sync\n" +
+          "• Support for 10 emails, 10 phones, 5 addresses\n" +
+          "• Custom fields, relationships, and significant dates\n\n" +
+
+          "DELETE:\n" +
+          `• Use DeleteContact("${resourceName}")\n` +
+          "• Remove from sync tables\n" +
+          "• Permanent removal from Google Contacts\n\n" +
+
+          "GROUP MANAGEMENT:\n" +
+          "• Add to contact groups for organization\n" +
+          "• Use AddContactToGroup() and RemoveContactFromGroup()\n" +
+          "• Filter sync tables by group membership\n\n" +
+
+          "ADVANCED FEATURES:\n" +
+          "• Full field access (names, emails, phones, addresses)\n" +
+          "• Organization details (company, job title, department)\n" +
+          "• Personal information (birthday, website, notes)\n" +
+          "• Custom fields for specialized data\n" +
+          "• Relationship tracking\n\n" +
+
+          "SYNC & AUTOMATION:\n" +
+          "• Two-way sync with Coda tables\n" +
+          "• Bulk operations via sync table\n" +
+          "• Formula-based automation\n" +
+          "• Real-time updates\n\n" +
+
+          "RECOMMENDED ACTIONS:\n" +
+          "• Use sync tables for bulk management\n" +
+          "• Organize with contact groups\n" +
+          "• Leverage custom fields for business data\n" +
+          "• Set up automations for contact workflows";
       }
-      
+
       else {
         return "UNRECOGNIZED CONTACT FORMAT\n\n" +
-               `Provided: ${resourceName}\n\n` +
-               
-               "POSSIBLE ISSUES:\n" +
-               "• Invalid resourceName format\n" +
-               "• Contact may not exist\n" +
-               "• Malformed contact reference\n\n" +
-               
-               "EXPECTED FORMATS:\n\n" +
-               
-               "Regular Contacts:\n" +
-               "   Format: people/c[ID]\n" +
-               "   Example: people/c123456789012345678\n" +
-               "   Source: Google Contacts main list\n\n" +
-               
-               "Other Contacts:\n" +
-               "   Format: otherContacts/c[ID]\n" +
-               "   Example: otherContacts/c987654321098765432\n" +
-               "   Source: Gmail auto-generated contacts\n\n" +
-               
-               "TROUBLESHOOTING:\n" +
-               "1. Check the resourceName spelling and format\n" +
-               "2. Use ReadContact() to verify the contact exists\n" +
-               "3. Use SearchContacts() to find the correct resourceName\n" +
-               "4. Check if the contact was recently deleted\n\n" +
-               
-               "NEXT STEPS:\n" +
-               "• Verify the contact exists in Google Contacts\n" +
-               "• Use sync tables to browse all available contacts\n" +
-               "• Search by name or email to find the correct reference";
+          `Provided: ${resourceName}\n\n` +
+
+          "POSSIBLE ISSUES:\n" +
+          "• Invalid resourceName format\n" +
+          "• Contact may not exist\n" +
+          "• Malformed contact reference\n\n" +
+
+          "EXPECTED FORMATS:\n\n" +
+
+          "Regular Contacts:\n" +
+          "   Format: people/c[ID]\n" +
+          "   Example: people/c123456789012345678\n" +
+          "   Source: Google Contacts main list\n\n" +
+
+          "Other Contacts:\n" +
+          "   Format: otherContacts/c[ID]\n" +
+          "   Example: otherContacts/c987654321098765432\n" +
+          "   Source: Gmail auto-generated contacts\n\n" +
+
+          "TROUBLESHOOTING:\n" +
+          "1. Check the resourceName spelling and format\n" +
+          "2. Use ReadContact() to verify the contact exists\n" +
+          "3. Use SearchContacts() to find the correct resourceName\n" +
+          "4. Check if the contact was recently deleted\n\n" +
+
+          "NEXT STEPS:\n" +
+          "• Verify the contact exists in Google Contacts\n" +
+          "• Use sync tables to browse all available contacts\n" +
+          "• Search by name or email to find the correct reference";
       }
-      
+
     } catch (error) {
       return "ERROR ANALYZING CONTACT\n\n" +
-             `Error: ${error.message}\n\n` +
-             
-             "GENERAL TROUBLESHOOTING:\n\n" +
-             
-             "CONTACT TYPE REFERENCE:\n" +
-             "• Regular Contacts: people/c[ID] - Full capabilities\n" +
-             "• Other Contacts: otherContacts/c[ID] - Read-only\n\n" +
-             
-             "COMMON LIMITATIONS:\n" +
-             "• Other Contacts cannot be deleted or edited\n" +
-             "• Use CopyOtherContactToContacts() to make them editable\n" +
-             "• Regular Contacts support all operations\n\n" +
-             
-             "FOR HELP:\n" +
-             "• Check Google Contacts API documentation\n" +
-             "• Verify contact permissions and access\n" +
-             "• Use sync tables to browse available contacts\n" +
-             "• Contact support if issues persist";
+        `Error: ${error.message}\n\n` +
+
+        "GENERAL TROUBLESHOOTING:\n\n" +
+
+        "CONTACT TYPE REFERENCE:\n" +
+        "• Regular Contacts: people/c[ID] - Full capabilities\n" +
+        "• Other Contacts: otherContacts/c[ID] - Read-only\n\n" +
+
+        "COMMON LIMITATIONS:\n" +
+        "• Other Contacts cannot be deleted or edited\n" +
+        "• Use CopyOtherContactToContacts() to make them editable\n" +
+        "• Regular Contacts support all operations\n\n" +
+
+        "FOR HELP:\n" +
+        "• Check Google Contacts API documentation\n" +
+        "• Verify contact permissions and access\n" +
+        "• Use sync tables to browse available contacts\n" +
+        "• Contact support if issues persist";
     }
   }
 });
