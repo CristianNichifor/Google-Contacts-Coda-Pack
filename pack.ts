@@ -2485,8 +2485,14 @@ pack.addSyncTable({
       coda.makeParameter({
         type: coda.ParameterType.String,
         name: "contactTypeFilter",
-        description: "Filter by contact type: 'CONTACT', 'OTHER_CONTACT', or leave empty for all",
-        optional: true
+        description: "Filter by contact type",
+        optional: true,
+        // ENHANCED: Select list for better UX (backward compatible - same values)
+        autocomplete: [
+          { display: "All Contacts", value: "" },
+          { display: "Regular Contacts (Editable)", value: "CONTACT" },
+          { display: "Other Contacts (Gmail Auto-Contacts)", value: "OTHER_CONTACT" }
+        ]
       }),
       coda.makeParameter({
         type: coda.ParameterType.String,
@@ -2512,7 +2518,7 @@ pack.addSyncTable({
           maxResults: limit
         });
 
-        // Sync regular contacts (CONTACT type)
+        // ENHANCED: Sync regular contacts (CONTACT type) with deletion handling
         if (!contactTypeFilter || contactTypeFilter === "CONTACT") {
           let url = "https://people.googleapis.com/v1/people/me/connections";
           const params = [
@@ -2538,6 +2544,14 @@ pack.addSyncTable({
 
             for (const person of people) {
               try {
+                // ENHANCED: Handle deleted contacts (skip them) - Note: only works with sync tokens
+                if (person.metadata?.deleted === true) {
+                  logContactOperation('DELETED_CONTACT_DETECTED', person.resourceName || 'unknown', {
+                    deletedAt: new Date().toISOString()
+                  });
+                  continue; // Skip deleted contacts
+                }
+
                 const contactData = extractContactData(person);
 
                 // Apply group filter if specified
@@ -2560,7 +2574,7 @@ pack.addSyncTable({
           } while (nextPageToken && results.length < limit);
         }
 
-        // Sync other contacts (OTHER_CONTACT type) if requested and space available
+        // ENHANCED: Sync other contacts (OTHER_CONTACT type) with deletion handling
         if ((!contactTypeFilter || contactTypeFilter === "OTHER_CONTACT") && results.length < limit) {
           let url = "https://people.googleapis.com/v1/otherContacts";
           const params = [
@@ -2586,6 +2600,12 @@ pack.addSyncTable({
 
             for (const person of people) {
               try {
+                // ENHANCED: Handle deleted Other Contacts
+                if (person.metadata?.deleted === true) {
+                  logContactOperation('DELETED_OTHER_CONTACT_DETECTED', person.resourceName || 'unknown');
+                  continue; // Skip deleted contacts
+                }
+
                 const contactData = extractContactData(person);
                 contactData.contactType = "OTHER_CONTACT";
                 results.push(contactData);
@@ -2620,7 +2640,7 @@ pack.addSyncTable({
       }
     },
 
-    // Two-way sync configuration
+    // Two-way sync configuration (unchanged for compatibility)
     maxUpdateBatchSize: 10,
 
     executeUpdate: async function (args, updates, context) {
@@ -2628,6 +2648,21 @@ pack.addSyncTable({
 
       const jobs = updates.map(async (update) => {
         try {
+          // ENHANCED: Check if contact was deleted in Google before updating
+          try {
+            await context.fetcher.fetch({
+              method: "GET",
+              url: `https://people.googleapis.com/v1/${String(update.previousValue.resourceName)}?personFields=metadata`,
+              cacheTtlSecs: 0
+            });
+          } catch (checkError) {
+            if (checkError.statusCode === 404) {
+              logContactOperation('UPDATE_SKIPPED_DELETED', String(update.previousValue.resourceName));
+              throw new coda.UserVisibleError(`Contact was deleted in Google Contacts: ${String(update.previousValue.displayName) || 'Unknown Contact'}`);
+            }
+            // Other errors are handled by the main update function
+          }
+
           return await updateContact(context, update);
         } catch (error) {
           const resourceName = String(update?.previousValue?.resourceName || update?.newValue?.resourceName || 'unknown');
