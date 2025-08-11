@@ -1,8 +1,3 @@
-# Coda Pack
-.coda-pack.json
-pack-build/
-*.pack
-
 # Node.js
 node_modules/
 npm-debug.log*
@@ -22,6 +17,11 @@ service-account-key.json
 client-secret.json
 oauth-config.json
 
+# Coda Pack
+.coda-pack.json
+pack-build/
+*.pack
+
 # Build outputs
 dist/
 build/
@@ -35,26 +35,13 @@ build/
 
 # OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Logs
-logs/
 *.log
+logs/
 
 # Temporary files
 tmp/
 temp/
 .tmp/
-
-# Package files
-package-lock.json
-yarn.lock
-
-# Coverage
-coverage/
-.nyc_output/
