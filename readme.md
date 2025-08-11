@@ -1,4 +1,4 @@
-# Google Contacts Coda Pack
+# Google Contacts Coda Pack (Beta)
 
 A comprehensive Google Contacts integration for Coda with full two-way sync capabilities, extended field support, and advanced contact management features.
 
