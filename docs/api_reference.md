@@ -1,82 +1,201 @@
-# API Reference
+# Google Contacts Coda Pack - Complete API Reference
 
-Complete reference for all pack functions including contact and group management.
+Complete reference for all pack functions with 85+ field support, international capabilities, and comprehensive contact management.
 
-## Sync Tables
+## 📊 Sync Tables
 
-### ContactsWithTwoWaySync
-Syncs all contacts with full editing support.
+### Contacts
+Main sync table with comprehensive two-way sync support for 85+ fields.
+
+**Formula:** `SyncContacts`
 
 **Parameters:**
-- `contactTypeFilter` (optional): "CONTACT" or "OTHER_CONTACT"
-- `groupFilter` (optional): Contact group resource name
-- `maxResults` (optional): Maximum contacts to return (default: 1000)
+- `contactTypeFilter` (optional): "CONTACT", "OTHER_CONTACT", or empty for all
+- `groupFilter` (optional): Contact group resource name for filtering
+- `maxResults` (optional): Maximum contacts to sync (default: 2000, max: 10000)
 
-**Examples:**
-```javascript
-SyncContacts()                           // All contacts
-SyncContacts("CONTACT")                  // Regular contacts only
-SyncContacts("OTHER_CONTACT")            // Other contacts only  
-SyncContacts("CONTACT", "contactGroups/myContacts")  // Filtered by group
-SyncContacts("", "", 500)                // Limit to 500 contacts
-```
+**Usage in Coda:**
+Configure these parameters in the sync table settings, not as function calls.
 
-**Returns:** Array of contact objects with two-way sync support
+**Field Categories:**
+- **Extended Names (11 fields):** displayName, prefix, givenName, middleName, familyName, suffix, phoneticFirst, phoneticMiddle, phoneticLast, nickname, fileAs
+- **Communications (22 fields):** 10 emails + labels, 10 phones + labels, allEmails, allPhones arrays
+- **Addresses (35 fields):** 5 complete addresses with street, street2, city, postcode, country, POBox, label
+- **Organization (3 fields):** organization, jobTitle, department
+- **Personal (13 fields):** birthday, website, notes, 10 significant dates + labels
+- **Advanced (22 fields):** relatedPeople, 10 custom fields + labels
+- **System (6 fields):** resourceName, etag, contactType, lastModified, memberships, photoUrl
 
 ### ContactGroups
-Syncs all contact groups with member information.
+Syncs all contact groups with detailed member information.
 
-**Parameters:** None
-
-**Example:**
-```javascript
-SyncContactGroups()
-```
-
-**Returns:** Array of contact group objects with member counts and resource names
-
-## Contact Actions
-
-### CreateContact
-Creates a new contact in Google Contacts with optional group assignment.
+**Formula:** `SyncContactGroups`
 
 **Parameters:**
-- `givenName` (required): First name
-- `familyName` (optional): Last name
-- `emailAddress` (optional): Email address
-- `phoneNumber` (optional): Phone number
-- `organization` (optional): Company name
-- `contactGroup` (optional): Group resource name for immediate assignment
+- `maxResults` (optional): Maximum groups to sync (default: 1000)
+
+**Returns:** Contact groups with member counts and resource names
+
+---
+
+## 🔧 Contact Management Actions
+
+### CreateContact
+Creates a new contact with comprehensive field support.
+
+**Parameters (21 total):**
+```javascript
+CreateContact(
+  givenName,              // Required: First name
+  familyName,             // Optional: Last name
+  middleName,             // Optional: Middle name
+  primaryEmail,           // Optional: Primary email
+  primaryEmailLabel,      // Optional: Email label (work, home, other, etc.)
+  primaryPhone,           // Optional: Primary phone
+  primaryPhoneLabel,      // Optional: Phone label (mobile, work, home, etc.)
+  organization,           // Optional: Company name
+  jobTitle,              // Optional: Job title
+  department,            // Optional: Department
+  primaryAddressCountry, // Optional: Country (from 249 supported)
+  primaryAddressStreet,  // Optional: Street address
+  primaryAddressStreet2, // Optional: Apt/Suite
+  primaryAddressPostcode,// Optional: Postal code
+  primaryAddressCity,    // Optional: City
+  primaryAddressPOBox,   // Optional: PO Box
+  primaryAddressLabel,   // Optional: Address label (home, work, other)
+  notes,                 // Optional: Notes
+  website,               // Optional: Website URL
+  birthday,              // Optional: Birthday (Date object)
+  contactGroup           // Optional: Group resource name
+)
+```
 
 **Examples:**
 ```javascript
-CreateContact("John", "Doe", "john@example.com", "+1234567890", "Acme Corp")
-CreateContact("Jane", "Smith")  // Minimal contact
-CreateContact("Bob", "Wilson", "bob@example.com", "", "", "contactGroups/salesTeam")  // With group
+// Comprehensive contact creation
+CreateContact(
+  "John",                    // givenName
+  "Doe",                     // familyName
+  "Michael",                 // middleName
+  "john.doe@company.com",    // primaryEmail
+  "work",                    // primaryEmailLabel
+  "+1-555-0123",            // primaryPhone
+  "mobile",                 // primaryPhoneLabel
+  "Acme Corporation",        // organization
+  "Senior Manager",          // jobTitle
+  "Sales",                   // department
+  "United States",           // primaryAddressCountry
+  "123 Business Street",     // primaryAddressStreet
+  "Suite 100",              // primaryAddressStreet2
+  "12345",                  // primaryAddressPostcode
+  "Business City",          // primaryAddressCity
+  "PO Box 456",             // primaryAddressPOBox
+  "work",                   // primaryAddressLabel
+  "Professional notes",      // notes
+  "https://company.com",     // website
+  Date(1990,5,15),          // birthday
+  "contactGroups/salesTeam"  // contactGroup
+)
+
+// Minimal contact
+CreateContact("Jane", "Smith")
+
+// Contact with email only
+CreateContact("Bob", "Wilson", "", "bob@example.com", "work")
 ```
 
-**Returns:** Created contact object with group membership if assigned
+**Returns:** Complete contact object with all fields populated
 
-**Note:** Uses two-step process - creates contact first, then adds to group if specified.
+### UpdateContact  
+Updates existing contact with extensive field support (85+ parameters).
 
-### UpdateContact
-Updates an existing contact's information.
-
-**Parameters:**
-- `resourceName` (required): Contact resource name
-- `givenName` (optional): New first name
-- `familyName` (optional): New last name
-- `emailAddress` (optional): New email address
-- `phoneNumber` (optional): New phone number
+**Key Parameters:**
+```javascript
+UpdateContact(
+  resourceName,           // Required: Contact resource name
+  // Extended name fields
+  givenName,             // Optional: First name
+  familyName,            // Optional: Last name
+  middleName,            // Optional: Middle name
+  prefix,                // Optional: Mr., Dr., etc.
+  suffix,                // Optional: Jr., Sr., etc.
+  nickname,              // Optional: Nickname
+  phoneticFirst,         // Optional: Phonetic first name
+  phoneticMiddle,        // Optional: Phonetic middle name
+  phoneticLast,          // Optional: Phonetic last name
+  fileAs,                // Optional: Filing preference
+  
+  // All 10 emails with labels
+  primaryEmail, primaryEmailLabel,
+  email2, email2Label,
+  // ... up to email10, email10Label
+  
+  // All 10 phones with labels
+  primaryPhone, primaryPhoneLabel,
+  phone2, phone2Label,
+  // ... up to phone10, phone10Label
+  
+  // Organization
+  organization, jobTitle, department,
+  
+  // All 5 addresses (complete address sets)
+  address1Country, address1Street, address1Street2, 
+  address1Postcode, address1City, address1POBox, address1Label,
+  // ... up to address5 fields
+  
+  // Personal information
+  birthday, website, notes,
+  
+  // Significant dates
+  significantDate1, significantDate1Label,
+  significantDate2, significantDate2Label,
+  significantDate3, significantDate3Label,
+  
+  // Related people and custom fields
+  relatedPeople,
+  customField1, customField1Label,
+  customField2, customField2Label,
+  // ... up to customField5
+  
+  contactGroup              // Optional: Group assignment
+)
+```
 
 **Example:**
 ```javascript
-UpdateContact("people/c123", "John", "Smith", "john.smith@email.com")
+// Update multiple fields
+UpdateContact(
+  "people/c123456789",
+  "Jonathan",                // givenName
+  "Smith",                   // familyName
+  "Robert",                  // middleName
+  "Dr.",                     // prefix
+  "PhD",                     // suffix
+  "Jon",                     // nickname
+  "",                        // phoneticFirst
+  "",                        // phoneticMiddle
+  "",                        // phoneticLast
+  "Smith, Jonathan R.",      // fileAs
+  "jonathan.smith@new.com",  // primaryEmail
+  "work"                     // primaryEmailLabel
+  // ... additional fields as needed
+)
 ```
 
-**Returns:** Updated contact object
+**Returns:** Updated contact object with all modified fields
 
-**Note:** Only works with regular contacts, not other contacts. Group memberships cannot be changed via this action.
+### ReadContact
+Retrieves detailed information for a specific contact.
+
+**Parameters:**
+- `resourceName` (required): Contact resource name (e.g., "people/c123456789")
+
+**Example:**
+```javascript
+ReadContact("people/c123456789")
+```
+
+**Returns:** Complete contact object with all 85+ fields
 
 ### DeleteContact
 Deletes a contact from Google Contacts.
@@ -86,309 +205,379 @@ Deletes a contact from Google Contacts.
 
 **Example:**
 ```javascript
-DeleteContact("people/c123")
+DeleteContact("people/c123456789")
 ```
 
-**Returns:** Success message
+**Returns:** Success confirmation message
 
-**Note:** Only works with regular contacts, not other contacts.
+**Note:** Only works with regular contacts (people/c...), not other contacts (otherContacts/c...)
 
-### CopyOtherContactToContacts
-Converts an "other contact" to a regular editable contact.
+### CopyContact
+Copies a contact with selective field copying options.
 
 **Parameters:**
-- `otherContactResourceName` (required): Other contact resource name
+```javascript
+CopyContact(
+  sourceResourceName,     // Required: Contact to copy
+  nameSuffix,            // Optional: Suffix for name (default: "Copy")
+  copyEmails,            // Optional: Copy emails (default: true)
+  copyPhones,            // Optional: Copy phones (default: true)
+  copyOrganization,      // Optional: Copy organization (default: true)
+  copyAddresses,         // Optional: Copy addresses (default: true)
+  copyOtherFields        // Optional: Copy other fields (default: true)
+)
+```
 
 **Example:**
 ```javascript
-CopyOtherContactToContacts("people/c456")
+// Copy contact with selective fields
+CopyContact("people/c123", "Backup", true, true, false, true, false)
+```
+
+**Returns:** New contact object
+
+### CopyOtherContactToContacts
+Converts "Other Contact" to editable regular contact.
+
+**Parameters:**
+```javascript
+CopyOtherContactToContacts(
+  resourceName,          // Required: Other contact resource name
+  copyNames,            // Optional: Copy names (default: true)
+  copyEmails,           // Optional: Copy emails (default: true)
+  copyPhones            // Optional: Copy phones (default: true)
+)
+```
+
+**Example:**
+```javascript
+CopyOtherContactToContacts("otherContacts/c987654321", true, true, true)
 ```
 
 **Returns:** New regular contact object
 
-**Note:** Original other contact remains unchanged. Only copies names, emails, and phone numbers.
+**Note:** Original other contact remains unchanged
 
-## Group Management Actions
+---
+
+## 👥 Contact Group Management
 
 ### CreateContactGroup
 Creates a new contact group.
 
 **Parameters:**
-- `groupName` (required): Name for the new contact group
+- `name` (required): Name for the contact group
+
+**Example:**
+```javascript
+CreateContactGroup("Enterprise Sales Team")
+```
+
+**Returns:** Contact group object with resource name
+
+### ReadContactGroup
+Reads detailed contact group information.
+
+**Parameters:**
+- `resourceName` (required): Contact group resource name
+
+**Example:**
+```javascript
+ReadContactGroup("contactGroups/salesTeam")
+```
+
+**Returns:** Contact group object with member details
+
+### UpdateContactGroup
+Updates a contact group's name.
+
+**Parameters:**
+```javascript
+UpdateContactGroup(
+  resourceName,          // Required: Group resource name
+  newName,              // Required: New group name
+  etag                  // Required: ETag from ReadContactGroup
+)
+```
+
+**Example:**
+```javascript
+UpdateContactGroup(
+  "contactGroups/salesTeam", 
+  "Updated Sales Team Name", 
+  "etag_value_from_read"
+)
+```
+
+**Returns:** Success confirmation message
+
+### DeleteContactGroup
+Deletes a contact group.
+
+**Parameters:**
+```javascript
+DeleteContactGroup(
+  resourceName,          // Required: Group resource name
+  deleteContacts         // Optional: Also delete contacts (default: false)
+)
+```
+
+**Example:**
+```javascript
+DeleteContactGroup("contactGroups/oldTeam", false)
+```
+
+**Returns:** Success confirmation message
+
+---
+
+## 🔍 Utility Functions
+
+### ExplainContactLimitations
+Comprehensive help system for contact types and limitations.
+
+**Parameters:**
+- `resourceName` (optional): Contact resource name to analyze
 
 **Examples:**
 ```javascript
-CreateContactGroup("Sales Team")
-CreateContactGroup("Project Alpha Members")
+// General overview
+ExplainContactLimitations()
+
+// Analyze specific contact
+ExplainContactLimitations("people/c123456789")
+ExplainContactLimitations("otherContacts/c987654321")
 ```
 
-**Returns:** New contact group object with resource name
+**Returns:** Detailed explanation with solutions and recommendations
 
-### AddContactToGroup
-Adds an existing contact to a contact group.
+---
 
-**Parameters:**
-- `contactResourceName` (required): Contact resource name
-- `groupResourceName` (required): Group resource name
+## 📋 Data Structures
 
-**Example:**
-```javascript
-AddContactToGroup("people/c123", "contactGroups/salesTeam")
-```
-
-**Returns:** Success message
-
-**Note:** Only works with regular contacts. Contact must exist before adding to group.
-
-### RemoveContactFromGroup
-Removes a contact from a contact group.
-
-**Parameters:**
-- `contactResourceName` (required): Contact resource name
-- `groupResourceName` (required): Group resource name
-
-**Example:**
-```javascript
-RemoveContactFromGroup("people/c123", "contactGroups/oldTeam")
-```
-
-**Returns:** Success message
-
-**Note:** Only works with regular contacts. Does not delete the contact, only removes group membership.
-
-## Search and Utility Functions
-
-### SearchContacts
-Searches for contacts by name, email, or other criteria.
-
-**Parameters:**
-- `query` (required): Search term
-- `limit` (optional): Maximum results (default: 25)
-
-**Examples:**
-```javascript
-SearchContacts("john@example.com")
-SearchContacts("John Smith", 10)
-SearchContacts("Acme Corp", 15)
-```
-
-**Returns:** Array of matching contacts
-
-### GetContact
-Retrieves detailed information for a specific contact.
-
-**Parameters:**
-- `resourceName` (required): Contact resource name
-
-**Example:**
-```javascript
-GetContact("people/c123")
-```
-
-**Returns:** Contact object with full details
-
-### ExplainOtherContactDeletion
-Explains why other contacts cannot be deleted and provides alternatives.
-
-**Parameters:**
-- `otherContactResourceName` (required): Other contact resource name
-
-**Example:**
-```javascript
-ExplainOtherContactDeletion("people/c456")
-```
-
-**Returns:** Explanation text with recommendations
-
-## Data Structures
-
-### Contact Object
+### Complete Contact Object (85+ Fields)
 ```javascript
 {
+  // Core identifiers
   resourceName: "people/c123456789",
-  etag: "abc123",
-  displayName: "John Doe",
+  etag: "abc123def456",
+  
+  // Extended names
+  displayName: "Dr. John Michael Doe Jr.",
+  prefix: "Dr.",
   givenName: "John",
+  middleName: "Michael", 
   familyName: "Doe",
-  middleName: "",
-  emailAddresses: ["john@example.com"],
-  phoneNumbers: ["+1234567890"],
-  organizations: ["Acme Corp"],
-  addresses: ["123 Main St, City, State"],
+  suffix: "Jr.",
+  phoneticFirst: "Jon",
+  phoneticMiddle: "MY-kel",
+  phoneticLast: "Doh",
+  nickname: "Johnny",
+  fileAs: "Doe, John M.",
+  
+  // 10 Emails with labels
+  primaryEmail: "john.doe@company.com",
+  primaryEmailLabel: "work",
+  email2: "john@personal.com",
+  email2Label: "home",
+  // ... up to email10 + email10Label
+  
+  // Compiled email array
+  allEmails: ["john.doe@company.com", "john@personal.com"],
+  
+  // 10 Phones with labels
+  primaryPhone: "+1-555-0123",
+  primaryPhoneLabel: "work",
+  phone2: "+1-555-0124",
+  phone2Label: "mobile",
+  // ... up to phone10 + phone10Label
+  
+  // Compiled phone array
+  allPhones: ["+1-555-0123", "+1-555-0124"],
+  
+  // Organization
+  organization: "Acme Corporation",
+  jobTitle: "Senior Manager",
+  department: "Sales",
+  
+  // 5 Complete addresses
+  primaryAddressStreet: "123 Business St",
+  primaryAddressStreet2: "Suite 100",
+  primaryAddressCity: "Business City",
+  primaryAddressPostcode: "12345",
+  primaryAddressCountry: "United States",
+  primaryAddressPOBox: "PO Box 456",
+  primaryAddressLabel: "work",
+  // ... address2 through address5 fields
+  
+  // Personal information
+  birthday: "1990-05-15",
+  website: "https://johndoe.com",
+  notes: "Important client contact",
+  
+  // 10 Significant dates
+  significantDate1: "2020-01-15",
+  significantDate1Label: "anniversary",
+  // ... up to significantDate10
+  
+  // Related people
+  relatedPeople: "Jane Doe: spouse, Bob Smith: colleague",
+  
+  // 10 Custom fields
+  customField1: "Employee ID 12345",
+  customField1Label: "Employee Information",
+  // ... up to customField10
+  
+  // System fields
   memberships: ["contactGroups/myContacts", "contactGroups/salesTeam"],
   photoUrl: "https://...",
-  birthdays: ["1990/5/15"],
   lastModified: "2024-01-15T10:30:00Z",
-  contactType: "CONTACT",
-  sources: ["CONTACT"]
+  contactType: "CONTACT"
 }
 ```
 
 ### Contact Group Object
 ```javascript
 {
-  resourceName: "contactGroups/myContacts",
-  etag: "def456",
-  name: "My Contacts",
-  formattedName: "My Contacts", 
+  resourceName: "contactGroups/salesTeam",
+  etag: "def456ghi789",
+  name: "Sales Team",
+  formattedName: "Sales Team",
   groupType: "USER_CONTACT_GROUP",
-  memberCount: 150,
-  memberResourceNames: ["people/c123", "people/c456"]
+  memberCount: 25,
+  memberResourceNames: ["people/c123", "people/c456", "people/c789"]
 }
 ```
 
-## Contact Types
+---
 
-### Regular Contact ("CONTACT")
-- Full read/write access
-- All fields available
-- Can be edited directly in Coda
-- Can be deleted
-- Can be added to/removed from groups
-- Supports all operations
+## 🔄 Contact Types & Capabilities
 
-### Other Contact ("OTHER_CONTACT")
-- Read-only access
-- Limited fields (names, emails, phones, photos only)
-- Cannot be edited directly
-- Cannot be deleted
-- Cannot be added to groups
-- Must use CopyOtherContactToContacts to make editable
+### Regular Contacts (people/c...)
+- ✅ **Full CRUD operations** - Create, Read, Update, Delete
+- ✅ **All 85+ fields** available and editable
+- ✅ **Two-way sync** with Coda tables
+- ✅ **Group management** - add/remove from groups
+- ✅ **Advanced features** - custom fields, relationships, international support
 
-## Group Management Workflows
+### Other Contacts (otherContacts/c...)
+- ❌ **Read-only** - Cannot edit or delete
+- ❌ **Limited fields** - Only names, emails, phones available
+- ❌ **No group assignment** possible
+- ❌ **No two-way sync** capability
+- ✅ **Conversion available** - Use CopyOtherContactToContacts()
 
-### Complete Contact Organization Workflow
+**Solution for Other Contacts:**
 ```javascript
-// 1. Create a new contact group
-CreateContactGroup("New Project Team")
-
-// 2. Create contact with immediate group assignment
-CreateContact("Alice", "Johnson", "alice@example.com", "+1555-0123", "Tech Corp", "contactGroups/newProjectTeam")
-
-// 3. Add existing contacts to the group
-AddContactToGroup("people/c123", "contactGroups/newProjectTeam")
-AddContactToGroup("people/c456", "contactGroups/newProjectTeam")
-
-// 4. Remove contacts from old groups
-RemoveContactFromGroup("people/c123", "contactGroups/oldProject")
-
-// 5. Search and organize
-SearchContacts("Tech Corp", 20)  // Find all company contacts
+// Convert Other Contact to editable Regular Contact
+CopyOtherContactToContacts("otherContacts/c987654321")
+// Result: Creates new "people/c..." contact that can be fully managed
 ```
 
-### Group Resource Name Patterns
-- User-created groups: `contactGroups/[groupId]`
-- System groups: `contactGroups/myContacts`, `contactGroups/starred`, etc.
-- Group IDs are generated by Google when creating groups
+---
 
-## Error Handling
+## 🌍 International Support
 
-### Common Error Codes
-- **400**: Bad request (invalid parameters, malformed data)
-- **401**: Authentication required (automatic token refresh)
-- **403**: Permission denied (insufficient scopes, access restrictions)
-- **404**: Resource not found (contact/group deleted or doesn't exist)
-- **409**: Conflict (contact modified by another user)
-- **429**: Rate limit exceeded (too many requests)
+### Supported Countries
+249 countries with automatic country code conversion:
+- **Input**: Country names (e.g., "United States", "United Kingdom", "Deutschland")
+- **Storage**: ISO country codes (e.g., "US", "GB", "DE")
+- **Display**: Full country names in sync tables
 
-### Group-Specific Errors
-- **Group not found**: Invalid group resource name
-- **Contact not found**: Invalid contact resource name
-- **Permission denied**: Cannot access group (may be system-managed)
-- **Already member**: Contact already in group (operation succeeds)
-- **Not a member**: Contact not in group for removal (operation succeeds)
+### Extended Name Support
+- **Phonetic fields** for international name pronunciation
+- **Prefix/suffix** support for titles and honors
+- **Filing preferences** with fileAs field
+- **Nickname support** for informal names
 
-### Best Practices
-1. Let 401 errors bubble up for automatic token refresh
-2. Implement retry logic for rate limits (429 errors)
-3. Validate resource names before API calls
-4. Handle missing resources gracefully
-5. Use appropriate error messages for users
-6. Check group type before attempting modifications
+### Address Formatting
+- **5 complete addresses** per contact
+- **International components** (street, street2, city, postcode, country, POBox)
+- **Address validation** and formatting
+- **Country-specific** postal code handling
 
-## Limitations
+---
 
-### Google API Limits
-- Other contacts have restricted field access
-- Some contact groups may be read-only (system groups)
-- Rate limits apply to all operations
-- Photos are read-only references
-- Group operations require separate API calls
+## ⚡ Performance & Limitations
 
-### Pack Limitations
-- Two-way sync only works with regular contacts
-- Other contacts cannot be edited or added to groups directly
-- Group memberships are read-only in sync table (use actions for changes)
-- Batch operations limited to 10 items at once
-- Group assignment in CreateContact is not atomic (contact created even if group assignment fails)
+### Sync Table Performance
+- **Maximum contacts**: 10,000 per sync
+- **Recommended limit**: 2,000 for optimal performance
+- **Batch updates**: Maximum 10 contacts per operation
+- **Field capacity**: All 85+ fields synced efficiently
 
-### Group Management Limitations
-- Cannot modify system-created groups (starred, myContacts, etc.)
-- Cannot delete contact groups through the API
-- Group membership changes are not reflected in sync tables until next refresh
-- Maximum group size limits apply (set by Google)
+### API Rate Limits
+- **Google People API**: 100 requests per 100 seconds per user
+- **Built-in handling**: Automatic retry logic for rate limits
+- **Monitoring**: Check Google Cloud Console for quota usage
 
-## Performance Tips
+### Two-Way Sync Limitations
+- **Regular contacts only**: Other contacts are read-only
+- **Field restrictions**: System fields (resourceName, etag) not editable
+- **Group memberships**: Use group actions, not direct sync table editing
+- **Conflict resolution**: Last write wins for concurrent edits
 
-1. **Use filters** to reduce data volume in sync operations
-2. **Implement caching** for frequently accessed data
-3. **Use batch operations** when available
-4. **Monitor API quotas** and usage in Google Cloud Console
-5. **Optimize sync frequency** based on usage patterns
-6. **Group operations efficiently**: batch multiple membership changes
-7. **Cache group resource names** to avoid repeated lookups
-8. **Use search judiciously** - it counts against API quotas
+### Data Validation
+- **Email validation**: Format checking with regex
+- **Phone validation**: Length and character validation
+- **Country validation**: Must match supported country list
+- **Required fields**: First name required for contact creation
 
-## Result Columns
+---
 
-All actions support result columns for immediate feedback:
+## 🔒 Security & Best Practices
 
-### Actions Returning Objects
-- **CreateContact**: Returns full contact object
-- **UpdateContact**: Returns updated contact object
-- **CopyOtherContactToContacts**: Returns new regular contact object
-- **GetContact**: Returns contact details
-- **CreateContactGroup**: Returns new group object
+### Authentication
+- **OAuth 2.0** with secure token handling
+- **Automatic refresh** for expired tokens
+- **Scope validation** for proper permissions
 
-### Actions Returning Messages
-- **DeleteContact**: Returns deletion confirmation
-- **AddContactToGroup**: Returns success message
-- **RemoveContactFromGroup**: Returns success message
-- **ExplainOtherContactDeletion**: Returns explanation text
+### Data Protection
+- **No data persistence** outside Google/Coda systems
+- **Secure API communication** over HTTPS
+- **User consent required** for all operations
 
-Result columns provide immediate feedback and enable workflow automation within Coda tables.
+### Error Handling
+- **Comprehensive logging** for debugging
+- **User-friendly error messages** for common issues
+- **Graceful degradation** for API failures
 
-## Quick Reference
+---
 
-### Most Common Operations
+## 📖 Quick Reference
+
+### Essential Operations
 ```javascript
-// Basic contact management
-CreateContact("John", "Doe", "john@example.com")
-UpdateContact("people/c123", "John", "Smith")
-DeleteContact("people/c123")
+// Contact CRUD
+CreateContact("John", "Doe", "", "john@example.com")
+ReadContact("people/c123456789")
+UpdateContact("people/c123", "Jonathan", "Smith")
+DeleteContact("people/c123456789")
 
-// Group operations
-CreateContactGroup("Team Alpha")
-AddContactToGroup("people/c123", "contactGroups/teamAlpha")
-RemoveContactFromGroup("people/c123", "contactGroups/oldTeam")
+// Other Contact conversion
+CopyOtherContactToContacts("otherContacts/c987654321")
 
-// Search and discovery
-SearchContacts("john@example.com")
-GetContact("people/c123")
+// Group management
+CreateContactGroup("New Team")
+ReadContactGroup("contactGroups/teamId")
+UpdateContactGroup("contactGroups/teamId", "Updated Name", "etag")
+DeleteContactGroup("contactGroups/oldTeam")
+
+// Utility
+ExplainContactLimitations("people/c123456789")
 ```
 
-### Sync Table Setup
-```javascript
-// Sync all contacts
-SyncContacts()
+### Sync Table Configuration
+- **All contacts**: Default settings
+- **Regular contacts only**: contactTypeFilter = "CONTACT"
+- **Specific group**: groupFilter = "contactGroups/targetGroup"
+- **Performance limit**: maxResults = 1000
 
-// Sync specific types
-SyncContacts("CONTACT")                    // Editable contacts only
-SyncContacts("OTHER_CONTACT")              // Gmail auto-contacts only
+### Common Workflows
+1. **Import contacts**: CreateContact() → organize with groups
+2. **Clean data**: Use UpdateContact() for standardization
+3. **Convert other contacts**: CopyOtherContactToContacts() → manage normally
+4. **International contacts**: Use extended name and address fields
+5. **Business contacts**: Leverage custom fields and organization data
 
-// Sync with filters
-SyncContacts("CONTACT", "contactGroups/work")  // Work contacts only
-SyncContacts("", "", 500)                      // Limit results
-```
-
-This reference covers all functionality available in the Google Contacts Coda Pack.
+This comprehensive API reference covers all functionality in the enhanced Google Contacts Coda Pack with 85+ field support and international capabilities.
