@@ -1,391 +1,266 @@
 # Google Contacts Coda Pack (Beta)
 
-A comprehensive Google Contacts integration for Coda with full two-way sync capabilities, extended field support, and advanced contact management features.
+Comprehensive two-way sync between Google Contacts and Coda with enterprise-grade field support and international capabilities.
 
 ![Coda Pack](https://img.shields.io/badge/Coda-Pack-blue)
 ![Google Contacts](https://img.shields.io/badge/Google-Contacts-green)
 ![Two Way Sync](https://img.shields.io/badge/Two%20Way-Sync-orange)
-![TypeScript](https://img.shields.io/badge/TypeScript-4.x-blue)
 
 ## ✨ Key Features
 
-- 🔄 **Full Two-Way Sync** - Edit contacts directly in Coda and sync changes back to Google
-- 📇 **Extended Contact Fields** - Support for 10 emails, 10 phones, 5 addresses, and extended name fields
-- 👥 **Contact Groups** - Create, manage, and assign contacts to groups
-- 🔨 **Complete CRUD Operations** - Create, read, update, delete contacts with full validation
+- 🔄 **Two-Way Sync** - Edit contacts directly in Coda and sync changes back to Google
+- 📇 **Extended Fields** - 10 emails, 10 phones, 5 addresses, extended name fields  
+- 🌍 **International** - 249 countries, proper address formatting, country codes
+- 👥 **Contact Groups** - Create, manage, and assign contacts with full membership tracking
+- 🔨 **Full CRUD** - Create, read, update, delete with comprehensive validation
 - ⚡ **Batch Operations** - Update multiple contacts simultaneously
-- 🎯 **Smart Filtering** - Filter by contact type, groups, search terms, or custom criteria
-- 🔐 **Secure OAuth** - Automatic token refresh with proper error handling
-- 📊 **Rich Data Support** - Birthdays, addresses, organizations, custom fields, and more
-- 🌍 **International Support** - Country codes, address formatting, and localization
-- 📱 **Contact Deduplication** - Smart duplicate detection and merging
-
-## 📋 Table of Contents
-
-- [Installation](#installation)
-- [Setup Guide](#setup-guide)
-- [Sync Tables](#sync-tables)
-- [Actions & Formulas](#actions--formulas)
-- [Extended Field Support](#extended-field-support)
-- [Use Cases](#use-cases)
-- [API Reference](#api-reference)
-- [Troubleshooting](#troubleshooting)
-- [Performance Tips](#performance-tips)
-- [Limitations](#limitations)
-- [Contributing](#contributing)
-
-## 🚀 Installation
-
-### Prerequisites
-- Google Cloud Console project with People API enabled
-- OAuth 2.0 credentials configured for web application
-- Coda workspace with pack development permissions
-
-### Quick Start
-1. **Download** `pack.ts` from this repository
-2. **Upload** to [Coda Pack Studio](https://coda.io/packs/build)
-3. **Configure** OAuth credentials in pack settings
-4. **Connect** your Google account
-5. **Create** sync tables in your Coda document
-
-### Detailed Setup
-For complete setup instructions, see our [Setup Guide](docs/setup-guide.md).
+- 🎯 **Smart Filtering** - Filter by contact type, groups, search terms
+- 🔐 **Secure OAuth** - Automatic token refresh with robust error handling
 
 ## 📊 Sync Tables
 
-### Enhanced Contacts (Two-Way Sync)
-The main sync table with comprehensive field support and two-way synchronization.
+### Contacts (Two-Way Sync)
+The main sync table provides comprehensive contact management with 85+ fields.
 
-```javascript
-// Sync all contacts
-SyncEnhancedContacts()
+**Parameters:**
+- `contactTypeFilter` (optional): "CONTACT", "OTHER_CONTACT", or empty for all
+- `groupFilter` (optional): Contact group resource name
+- `maxResults` (optional): Max contacts to sync (default: 2000, max: 10000)
 
-// Filter by contact type
-SyncEnhancedContacts("CONTACT")        // Editable regular contacts only
-SyncEnhancedContacts("OTHER_CONTACT")  // Gmail auto-contacts (read-only)
+**Usage in Coda:**
+1. Add sync table to your doc
+2. Configure parameters in table settings
+3. Set up two-way sync for direct editing
+4. Use filters and views for organization
 
-// Filter by contact group
-SyncEnhancedContacts("CONTACT", "contactGroups/work")
-
-// Limit results for better performance
-SyncEnhancedContacts("", "", 500)      // First 500 contacts
-
-// Combined filters
-SyncEnhancedContacts("CONTACT", "contactGroups/team", 100)
-```
-
-**Supported Fields:**
-- **Extended Names:** prefix, givenName, middleName, familyName, suffix, displayName, phoneticName
-- **Communications:** 10 emails with labels, 10 phones with labels
-- **Addresses:** 5 complete addresses with all components
-- **Organization:** company, jobTitle, department
-- **Personal:** birthday, notes, website, photo
-- **Compiled Lists:** allEmails, allPhones (read-only arrays)
-- **Metadata:** contactType, lastModified, groups
+**Available Fields:**
+- **Extended Names:** prefix, givenName, middleName, familyName, suffix, phoneticFirst/Middle/Last, nickname, fileAs
+- **Communications:** 10 emails + labels, 10 phones + labels, allEmails/allPhones arrays
+- **Addresses:** 5 complete addresses (street, street2, city, postcode, country, POBox, label)
+- **Organization:** organization, jobTitle, department
+- **Personal:** birthday, website, notes, photoUrl
+- **Advanced:** 10 significant dates + labels, relatedPeople, 10 custom fields + labels
+- **System:** resourceName, etag, contactType, lastModified, memberships
 
 ### Contact Groups
-Manage and sync contact groups for organization.
+The sync table for managing contact groups with member tracking.
 
-```javascript
-// Sync all contact groups
-SyncContactGroups()
-```
-
-**Group Fields:**
-- resourceName, name, formattedName
-- groupType, memberCount
-- memberResourceNames (array of contact IDs)
+**Parameters:**
+- `maxResults` (optional): Max groups to sync (default: 1000)
 
 ## 🔧 Actions & Formulas
 
 ### Contact Management
-
-#### Create Contacts
 ```javascript
-// Basic contact creation
-CreateContact("John", "Doe", "john@example.com", "+1234567890", "Acme Corp")
+// Create with primary fields
+CreateContact(
+  "John",                      // givenName (required)
+  "Doe",                       // familyName
+  "Smith",                     // middleName
+  "john@company.com",          // primaryEmail
+  "work",                      // primaryEmailLabel
+  "+1234567890",               // primaryPhone
+  "mobile",                    // primaryPhoneLabel
+  "Acme Corp",                 // organization
+  "Manager",                   // jobTitle
+  "Sales",                     // department
+  "United States",             // primaryAddressCountry
+  "123 Main St",               // primaryAddressStreet
+  "Suite 100",                 // primaryAddressStreet2
+  "12345",                     // primaryAddressPostcode
+  "City",                      // primaryAddressCity
+  "PO Box 123",                // primaryAddressPOBox
+  "work",                      // primaryAddressLabel
+  "Notes here",                // notes
+  "https://website.com",       // website
+  new Date("1990-01-01"),      // birthday
+  "contactGroups/team"         // contactGroup
+)
 
-// Minimal contact (name only)
-CreateContact("Jane", "Smith")
+// Update with extensive field support (85+ parameters)
+UpdateContact(
+  "people/c123",
+  "John",                      // givenName
+  "Smith",                     // familyName
+  "Robert",                    // middleName
+  "Dr.",                       // prefix
+  "Jr.",                       // suffix
+  // ... all extended name fields
+  "john@newcompany.com",       // primaryEmail
+  "work",                      // primaryEmailLabel
+  "personal@email.com",        // email2
+  "home",                      // email2Label
+  // ... up to email10 + labels
+  "+1-555-0123",              // primaryPhone
+  "work",                     // primaryPhoneLabel
+  // ... up to phone10 + labels
+  "New Company",              // organization
+  "Director",                 // jobTitle
+  "Engineering",              // department
+  // ... all 5 address sets
+  new Date("1990-05-15"),     // birthday
+  "https://newsite.com",      // website
+  "Updated notes",            // notes
+  // ... significant dates, related people, custom fields
+)
 
-// With group assignment
-CreateContact("Bob", "Wilson", "bob@example.com", "", "", "contactGroups/salesTeam")
+// Copy contacts with selective fields
+CopyContact("people/c123", "Copy", true, true, true, true, false)
 
-// Extended contact creation with all name fields
-CreateExtendedContact("John", "Doe", "john@example.com", "+1234567890", "Acme Corp", "Dr.", "Jr.")
-```
+// Convert Other Contacts to editable
+CopyOtherContactToContacts("otherContacts/c456", true, true, true)
 
-#### Update Contacts
-```javascript
-// Update basic fields
-UpdateContact("people/c123", "John", "Smith", "john.smith@email.com")
-
-// Two-way sync automatically handles updates when you edit the sync table
-```
-
-#### Delete Contacts
-```javascript
-// Delete regular contacts (Other contacts cannot be deleted)
+// Read, delete, get help
+ReadContact("people/c123")
 DeleteContact("people/c123")
-```
-
-#### Contact Conversion
-```javascript
-// Convert "Other Contact" to editable regular contact
-CopyOtherContactToContacts("people/c456")
+ExplainContactLimitations("people/c123")  // Built-in help system
 ```
 
 ### Group Management
-
-#### Create & Manage Groups
 ```javascript
-// Create new contact group
 CreateContactGroup("Sales Team")
-CreateContactGroup("Project Alpha")
-
-// Add contacts to groups
-AddContactToGroup("people/c123", "contactGroups/salesTeam")
-
-// Remove from groups
-RemoveContactFromGroup("people/c123", "contactGroups/oldTeam")
+ReadContactGroup("contactGroups/salesTeam")
+UpdateContactGroup("contactGroups/salesTeam", "New Name", "etag_value")
+DeleteContactGroup("contactGroups/oldTeam", false)  // deleteContacts optional
 ```
-
-### Search & Discovery
-
-#### Contact Search
-```javascript
-// Search by email
-SearchContacts("john@example.com")
-
-// Search by name with limit
-SearchContacts("John Smith", 10)
-
-// Search by company
-SearchContacts("Acme Corp", 25)
-
-// Get specific contact details
-GetContact("people/c123")
-```
-
-### Advanced Features
-
-#### Contact Deduplication
-```javascript
-// Find potential duplicates
-FindDuplicateContacts("people/c123")
-
-// Merge contacts (keeps first, deletes second)
-MergeContacts("people/c123", "people/c456")
-
-// Duplicate with custom naming
-DuplicateContact("people/c123", "Copy")
-```
-
-#### Data Export
-```javascript
-// Export contact as vCard
-ExportContactAsVCard("people/c123")
-```
-
-## 🌟 Extended Field Support
-
-### Name Fields
-- **prefix:** Mr., Mrs., Dr., Prof., etc.
-- **givenName:** First name
-- **middleName:** Middle name or initial  
-- **familyName:** Last name / surname
-- **suffix:** Jr., Sr., III, PhD, etc.
-- **displayName:** Formatted display name
-- **phoneticName:** Phonetic pronunciation
-
-### Communication Fields
-- **10 Email addresses** with customizable labels (work, home, other, custom)
-- **10 Phone numbers** with standard labels (mobile, work, home, fax, etc.)
-- **Compiled arrays:** `allEmails` and `allPhones` for easy access
-
-### Address Fields (5 Complete Addresses)
-Each address includes:
-- Street address and extended address (apartment, suite)
-- City, postal/zip code, country
-- PO Box support
-- Address type labels (home, work, other)
-
-### Organization & Personal
-- **Company information:** name, job title, department
-- **Personal details:** birthday, notes, website
-- **Custom fields:** User-defined key-value pairs
-- **Contact groups:** Multiple group memberships
-- **Photos:** Profile picture URLs (read-only)
 
 ## 🎯 Use Cases
 
-### CRM & Sales Management
-1. **Sync contacts** to Coda for enhanced CRM functionality
-2. **Add custom columns** (Lead Status, Deal Value, Last Contact Date)
-3. **Use Coda automations** for follow-up workflows
-4. **Two-way sync** keeps Google Contacts updated automatically
+### Enterprise CRM
+- Sync contacts with 85+ fields for comprehensive data
+- Use custom fields for business-specific data (Employee ID, Lead Score)
+- Track relationships and significant dates
+- International address support for global operations
 
 ### Team Collaboration
-1. **Share contact database** with team via Coda document
-2. **Team members edit** contacts directly in shared tables
-3. **Changes sync automatically** to everyone's Google Contacts
-4. **Group management** for project-based organization
+- Share contact database via Coda with extended fields
+- Team edits sync automatically to Google Contacts
+- Organize with contact groups by project/department
+- Track contact relationships and important dates
 
 ### Contact Organization
-1. **Create contact groups** for different categories (customers, vendors, team)
-2. **Batch assign contacts** to appropriate groups
-3. **Move contacts between groups** as relationships change
-4. **Convert Gmail auto-contacts** to editable contacts
+- Convert Gmail auto-contacts to editable regular contacts
+- Organize with custom contact groups
+- Use extended name fields for proper international names
+- Manage multiple addresses per contact
 
-### Data Management
-1. **Import contacts** from CSV/Excel via Coda's import features
-2. **Use formulas** to create contacts programmatically
-3. **Validate and clean** contact data with Coda's data tools
-4. **Export to vCard** for backup or migration
+## 🌍 International Support
 
-### Advanced Workflows
-1. **Duplicate detection** and merging
-2. **Contact enrichment** with external data sources
-3. **Automated group assignment** based on contact properties
-4. **Integration** with other Coda packs for comprehensive workflows
+### Countries & Addresses
+- **249 countries** with ISO codes and automatic conversion
+- **5 complete addresses** per contact with all components
+- **Address validation** and formatting
+- **Country name ↔ code conversion** utilities
 
-## 📚 API Reference
+### Extended Name Support
+- **Phonetic fields** (phoneticFirst, phoneticMiddle, phoneticLast)
+- **Name prefixes/suffixes** (Dr., Jr., Sr., III, etc.)
+- **Filing preferences** with fileAs field
+- **Nickname support** for informal names
 
-For complete API documentation, see our [API Reference Guide](docs/api-reference.md).
+## 🔧 Technical Details
 
-### Quick Reference
+### Field Capacity
+- **Total fields:** 85+ per contact
+- **Emails:** 10 with smart labels (work, home, personal, business, etc.)
+- **Phones:** 10 with standard labels (mobile, work, home, fax, google voice)
+- **Addresses:** 5 complete international addresses
+- **Custom fields:** 10 user-defined with labels
+- **Significant dates:** 10 with custom labels
 
-#### Contact Operations
-- `CreateContact(givenName, familyName, email, phone, company, group?)`
-- `UpdateContact(resourceName, givenName, familyName, email)`
-- `DeleteContact(resourceName)`
-- `GetContact(resourceName)`
-- `SearchContacts(query, maxResults?)`
+### Performance
+- **Contact limit:** Up to 10,000 contacts per sync
+- **Batch updates:** Maximum 10 contacts per operation
+- **Smart caching:** Appropriate TTL for different operations
+- **Rate limiting:** Built-in Google API quota management
 
-#### Group Operations
-- `CreateContactGroup(name)`
-- `AddContactToGroup(contactId, groupId)`
-- `RemoveContactFromGroup(contactId, groupId)`
+### Data Validation
+- **Email validation** with format checking
+- **Phone normalization** and validation
+- **Address validation** with country code support
+- **Duplicate detection** and field deduplication
+- **Contact data validation** before API calls
 
-#### Advanced Operations
-- `CopyOtherContactToContacts(resourceName)`
-- `FindDuplicateContacts(resourceName)`
-- `MergeContacts(keepContact, deleteContact)`
-- `DuplicateContact(resourceName, suffix?)`
-- `ExportContactAsVCard(resourceName)`
+## 🔐 Security & Requirements
 
-## 🚨 Troubleshooting
+### Google Cloud Setup
+- Google Cloud Console project
+- People API enabled
+- OAuth 2.0 credentials with redirect: `https://coda.io/packsAuth/oauth2`
 
-### Common Issues
+### Required Scopes
+```
+https://www.googleapis.com/auth/contacts
+https://www.googleapis.com/auth/contacts.readonly
+https://www.googleapis.com/auth/contacts.other.readonly
+profile
+```
 
-#### Authentication Problems
-- **Daily token expiration:** Ensure OAuth configuration has `access_type: "offline"`
-- **Permission denied:** Verify all required scopes are granted in Google Cloud Console
-- **Account reconnection:** Re-authorize if 401 errors persist
+### Authentication
+- OAuth 2.0 with `access_type: "offline"` and `prompt: "consent"`
+- Automatic token refresh
+- Secure credential storage via Coda platform
 
-#### Sync Issues
-- **Two-way sync not working:** Ensure contact type is "CONTACT" (regular contacts)
-- **Missing fields:** Other contacts have limited field access - use `CopyOtherContactToContacts`
-- **Schema mismatch:** Check that `mutable: true` is set for editable fields
+## 🚨 Contact Types & Limitations
 
-#### Performance Issues
-- **Large contact lists:** Use filtering and pagination (`maxResults` parameter)
-- **Rate limiting:** Monitor API quotas in Google Cloud Console
-- **Slow sync:** If you have a lot of contacts
+### Regular Contacts (`people/c...`)
+- ✅ **Full CRUD operations** - create, read, update, delete
+- ✅ **All 85+ fields** available and editable
+- ✅ **Contact group assignment** and management
+- ✅ **Two-way sync** with Coda tables
 
-### Error Codes
-- **400:** Bad request (invalid data format)
-- **401:** Authentication expired (automatic refresh)
-- **403:** Permission denied (check scopes)
-- **404:** Resource not found (contact/group deleted)
-- **409:** Conflict (concurrent modification)
-- **429:** Rate limit exceeded
+### Other Contacts (`otherContacts/c...`)
+- ❌ **Read-only** - cannot edit or delete (Google API limitation)
+- ❌ **Limited fields** - only names, emails, phones
+- ❌ **No group assignment** possible
+- ✅ **Convert to Regular Contact** using `CopyOtherContactToContacts()`
 
-For detailed troubleshooting, see our [Troubleshooting Guide](docs/troubleshooting.md).
+### Built-in Help
+Use `ExplainContactLimitations()` for:
+- General contact type explanations
+- Specific contact analysis with solutions
+- Step-by-step conversion workflows
+- Troubleshooting guidance
 
 ## 📈 Performance Tips
 
 ### For Large Contact Lists
-- Use `contactType` filters to sync only needed contacts
-- Implement pagination with `maxResults` parameter
-- Filter by specific groups to reduce data volume
+- Use `contactTypeFilter: "CONTACT"` for best performance
+- Apply group filtering for targeted syncs
+- Set `maxResults` parameter (up to 10,000)
 - Schedule syncs during off-peak hours
 
 ### For Efficient Operations
-- **Batch operations:** Group multiple updates together
-- **Cache group IDs:** Store group resource names for reuse
-- **Validate data:** Check formats before API calls
-- **Monitor quotas:** Track API usage in Google Cloud Console
+- Batch contact updates when possible
+- Cache group resource names
+- Use built-in validation before API calls
+- Monitor API quotas in Google Cloud Console
 
-### For Better User Experience
-- **Set up result columns** for immediate action feedback
-- **Use contact type filters** in table views
-- **Create separate views** for different workflows
-- **Regular sync refreshes** for up-to-date data
-
-## 📊 Limitations
-
-### Google API Limitations
-- **Rate limits:** 100 requests per 100 seconds per user
-- **Other contacts:** Limited field access (name, email, phone only)
-- **Photos:** Read-only URLs, cannot upload/modify
-- **Group operations:** Require separate API calls
-
-### Pack Limitations
-- **Batch size:** Maximum 10 updates per operation
-- **Other contact editing:** Must copy to regular contacts first
-- **Group deletion:** Not supported via API
-- **System groups:** Cannot be modified (starred, myContacts, etc.)
-
-### Coda Platform Limitations
-- **Token storage:** Managed by Coda OAuth system
-- **Sync frequency:** Controlled by Coda's sync mechanism
-- **Field types:** Limited to pack-defined schema types
+### Field Mapping
+- **Emails:** `email1-3` → `primaryEmail, email2-10` with labels
+- **Phones:** `phone1-3` → `primaryPhone, phone2-10` with labels
+- **Addresses:** Basic → 5 complete international addresses
+- **Names:** Basic → Extended with prefix, suffix, phonetic fields
+- **New:** Custom fields, significant dates, relationships
 
 ## 🤝 Contributing
 
-I welcome contributions to improve the Google Contacts Coda Pack!
-
-### Development Setup
-1. **Clone** this repository
-2. **Install** Coda Pack CLI: `npm install -g @codahq/packs-cli`
-3. **Validate** pack: `coda validate pack.ts`
-4. **Test** locally: `coda upload pack.ts`
-
-### Contribution Guidelines
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Make** your changes with proper TypeScript typing
-4. **Test** thoroughly with your Google account
-5. **Submit** a pull request with detailed description
-
-### Areas for Contribution
-- Additional contact field support
-- Enhanced duplicate detection algorithms
-- Better error handling and user messages
-- Performance optimizations
-- Documentation improvements
+1. Fork repository
+2. Install Coda Pack CLI: `npm install -g @codahq/packs-cli`
+3. Validate: `coda validate pack.ts`
+4. Test with your Google account
+5. Submit pull request
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 📞 Support
 
-- **Documentation:** Check our [docs](docs/) folder
-- **Issues:** Create an [issue](../../issues) for bugs or feature requests
-- **Discussions:** Use [discussions](../../discussions) for questions
-- **Email:** Contact pack maintainers for urgent issues
-
-## 🔗 Related Resources
-
-- [Coda Pack SDK Documentation](https://coda.io/packs/build/latest/)
-- [Google People API Reference](https://developers.google.com/people)
-- [OAuth 2.0 Setup Guide](https://developers.google.com/identity/protocols/oauth2)
-- [Google Cloud Console](https://console.cloud.google.com/)
+- **Issues:** [GitHub Issues](../../issues) for bugs and features
+- **Discussions:** [GitHub Discussions](../../discussions) for questions
+- **Built-in Help:** Use `ExplainContactLimitations()` in the pack
 
 ---
 
-**Made with ❤️ for the Coda community**
-
-*Last updated: August 2025*
+**Enterprise-ready contact management with comprehensive two-way sync between Google Contacts and Coda.**
