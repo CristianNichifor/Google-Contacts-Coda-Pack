@@ -20,9 +20,8 @@
   "author": "Cristian Nichifor",
   "license": "MIT",
   "devDependencies": {
-    "@codahq/packs-cli": "latest",
-    "@codahq/packs-sdk": "latest",
-    "typescript": "latest"
+    "@codahq/packs-sdk": "^1.17.6",
+    "typescript": "^5.6.0"
   },
   "engines": {
     "node": ">=19.0.0"
