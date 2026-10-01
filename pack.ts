@@ -2522,7 +2522,7 @@ pack.addSyncTable({
         if (!contactTypeFilter || contactTypeFilter === "CONTACT") {
           let url = "https://people.googleapis.com/v1/people/me/connections";
           const params = [
-            `pageSize=${Math.min(1000, Math.floor(limit / 2))}`,
+            `pageSize=${Math.max(1, Math.min(1000, Math.floor(limit / 2)))}`,
             "personFields=names,nicknames,emailAddresses,phoneNumbers,organizations,addresses,memberships,photos,birthdays,metadata,biographies,urls,events,relations,userDefined"
           ];
           url += "?" + params.join("&");
