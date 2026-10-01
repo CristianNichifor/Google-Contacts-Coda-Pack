@@ -47,6 +47,13 @@ Comprehensive Google Contacts Coda Pack with full two-way sync support. Manage r
 - **No data persistence** - direct API passthrough
 - **Comprehensive error handling** with user-friendly messages
 
+## Contributing locally
+
+Use Node 22.x and run `npm ci`, `npm test`, `npm run validate`, and
+`npm run build`. After dependency installation, these checks need no network or
+account credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for the mocked test
+workflow and PR requirements. The account setup below is for installing the Pack.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
