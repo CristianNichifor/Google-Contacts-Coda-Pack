@@ -1,13 +1,5 @@
 name: CI
 
-# Named `verify` so the check reports as `CI / verify`, matching the required
-# check name used across the estate.
-#
-# A Coda Pack is uploaded, not deployed — `coda upload` pushes pack.ts straight
-# to Coda, where a broken definition surfaces as a failing formula in someone's
-# doc. `coda validate` is the same check Coda applies at upload time, so running
-# it here moves that discovery from after the upload to before the merge.
-
 on:
   push:
     branches: [dev, main]
@@ -21,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  checks:
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
@@ -32,7 +24,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install
@@ -42,11 +34,22 @@ jobs:
         # exist on the registry.
         run: npm ci
 
-      # No standalone tsc step. The repo has no tsconfig.json, so a bare
-      # `tsc --noEmit` fails on missing @types/node and a pre-ES2019 lib target
-      # — config gaps, not defects in pack.ts. `coda validate` compiles the pack
-      # with the SDK's own settings, which is the compilation that actually
-      # matters. Adding a tsconfig here would risk disagreeing with it; worth
-      # doing deliberately, not as a side effect of adding CI.
+      - name: Test mocked People API behavior
+        run: npm test
+
       - name: Validate pack
-        run: npx coda validate pack.ts
+        run: npm run validate
+
+      - name: Build pack
+        run: npm run build
+
+  verify:
+    if: ${{ always() }}
+    needs: [checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require all correctness checks
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+        run: test "$CHECKS_RESULT" = success
