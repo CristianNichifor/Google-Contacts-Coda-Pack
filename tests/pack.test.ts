@@ -1,10 +1,26 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
+import {createRequire} from 'node:module';
 import {
   executeFormulaFromPackDef, executeSyncFormulaFromPackDefSingleIteration,
   executeUpdateFormulaFromPackDef, newMockSyncExecutionContext, newJsonFetchResponse,
 } from '@codahq/packs-sdk/dist/development';
 import {pack} from '../pack';
+
+test('SDK query-string dependencies handle nullish comma-array entries', () => {
+  // GHSA-q8mj-m7cp-5q26: resolve each consumer's copy, including nested qs.
+  const sdkRequire = createRequire(require.resolve('@codahq/packs-sdk'));
+  const expressRequire = createRequire(sdkRequire.resolve('express'));
+  const bodyParserRequire = createRequire(expressRequire.resolve('body-parser'));
+  for (const consumer of [sdkRequire, expressRequire, bodyParserRequire]) {
+    const qs = consumer('qs');
+    for (const value of [null, undefined]) {
+      assert.equal(qs.stringify({a: [value, 'b']}, {
+        arrayFormat: 'comma', encodeValuesOnly: true,
+      }), 'a=,b');
+    }
+  }
+});
 
 // SDK helpers return schema-normalized (PascalCase) result keys.
 const options = {};

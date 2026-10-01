@@ -24,6 +24,9 @@
     "@codahq/packs-sdk": "^1.17.6",
     "typescript": "^5.6.0"
   },
+  "overrides": {
+    "qs": "6.16.0"
+  },
   "engines": {
     "node": "22.x"
   }
