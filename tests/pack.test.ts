@@ -68,6 +68,13 @@ test('other contacts paginate and stop at the shared result limit', async () => 
   api.done();
 });
 
+test('one-contact sync sends a positive page size and stops after one row', async () => {
+  const api = mockApi([{method: 'GET', path: '/v1/people/me/connections', body: {connections: [person('one'), person('two')], nextPageToken: 'unused'}, check: (_, url) => assert.equal(url.searchParams.get('pageSize'), '1')}]);
+  const result = await sync(api.context, ['CONTACT', '', 1]);
+  assert.deepEqual(result.result.map(row => row.ResourceName), ['people/one']);
+  api.done();
+});
+
 test('sync caps API pages at 1000 for oversized requested limits', async () => {
   const api = mockApi([{method: 'GET', path: '/v1/people/me/connections', body: {}, check: (_, url) => assert.equal(url.searchParams.get('pageSize'), '1000')}]);
   assert.deepEqual((await sync(api.context, ['CONTACT', '', 50000])).result, []);
