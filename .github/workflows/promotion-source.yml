@@ -1,0 +1,24 @@
+name: Promotion source
+
+# main only takes promotions from dev; required by the cnw-production-gate ruleset.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  promotion-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require dev of this repository as the head
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if [ "$HEAD_REF" != dev ] || [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::PRs into main must come from dev ($HEAD_REPO:$HEAD_REF given)"
+            exit 1
+          fi
