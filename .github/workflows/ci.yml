@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        # `npm ci` rather than `npm install`: it honours the lockfile exactly and
+        # fails if package.json and the lockfile disagree, which is the check
+        # that would have caught this repo depending on a package that does not
+        # exist on the registry.
+        run: npm ci
+
+      - name: Test mocked People API behavior
+        run: npm test
+
+      - name: Validate pack
+        run: npm run validate
+
+      - name: Build pack
+        run: npm run build
+
+  verify:
+    if: ${{ always() }}
+    needs: [checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require all correctness checks
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+        run: test "$CHECKS_RESULT" = success
